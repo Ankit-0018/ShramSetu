@@ -23,6 +23,7 @@ export type Job = {
   status: "open" | "closed" | "assigned" | "completed" | "cancelled" | "deleted";
   createdAt?: string | any;
   updatedAt?: string | any;
+  distance?: number;
 };
 
 export type Application = {
