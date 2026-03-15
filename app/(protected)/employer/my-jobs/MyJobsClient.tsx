@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
@@ -18,16 +18,19 @@ import {
   Clock,
   Loader2,
 } from "lucide-react";
+import { getEmployerJobs } from "@/lib/queries/jobs";
+import Spinner from "@/components/_shared/spinner";
 
 type Tab = "open" | "closed";
 
-export default function MyJobsClient({ jobs }: { jobs: Job[] }) {
+export default function MyJobsClient() {
   const [activeTab, setActiveTab] = useState<Tab>("open");
+  const [jobs,setJobs] = useState<Job[]>([]);
   const { user } = useUserStore();
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
+  const [loading, setLoading] = useState<boolean>(true);
   const openJobs = jobs.filter((j) => j.status === "open");
   const closedJobs = jobs.filter((j) => j.status !== "open");
   const filteredJobs = activeTab === "open" ? openJobs : closedJobs;
@@ -50,6 +53,24 @@ export default function MyJobsClient({ jobs }: { jobs: Job[] }) {
     }
   };
 
+  useEffect(() => {
+
+    if(!user?.uid) return;
+  getEmployerJobs(user.uid).then((res) => {
+    setJobs(res);
+    setLoading(false)
+  });
+  },[user])
+
+
+    if (loading) {
+      return <Spinner />
+    }
+      if (!jobs) {
+      return <div className="p-6">No jobs data found</div>;
+    }
+  
+ 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
       {/* Header */}

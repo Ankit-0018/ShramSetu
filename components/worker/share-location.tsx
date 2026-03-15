@@ -1,11 +1,12 @@
 import { useLiveLocation } from "@/hooks/useLiveLocation";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { MapPin, MapPinOff } from "lucide-react";
-import Spinner from "../_shared/spinner";
+
 
 const ShareLocation = () => {
   const { location } = useUserStore();
-  const { startTracking, stopTracking, isTracking, locationLoading } = useLiveLocation();
+  const { startTracking, stopTracking, isTracking, locationLoading } =
+    useLiveLocation();
 
   return (
     <>
@@ -43,18 +44,16 @@ const ShareLocation = () => {
         </div>
       </div>
 
-     { location && isTracking ? (
-  <div className="bg-linear-to-br from-blue-100 to-cyan-100 rounded-2xl p-4 h-48 flex items-center justify-center relative border border-blue-200 overflow-hidden">
-    <div className="text-center z-10">
-      <div className="text-3xl mb-2">📍</div>
-      <p className="text-xs font-medium text-gray-700">
-        Your Location
-      </p>
-    </div>
+      {location && isTracking ? (
+        <div className="bg-linear-to-br from-blue-100 to-cyan-100 rounded-2xl p-4 h-48 flex items-center justify-center relative border border-blue-200 overflow-hidden">
+          <div className="text-center z-10">
+            <div className="text-3xl mb-2">📍</div>
+            <p className="text-xs font-medium text-gray-700">Your Location</p>
+          </div>
 
-    <div className="absolute w-32 h-32 rounded-full border-2 border-blue-300 border-dashed opacity-50"></div>
-  </div>
-) : null}
+          <div className="absolute w-32 h-32 rounded-full border-2 border-blue-300 border-dashed opacity-50"></div>
+        </div>
+      ) : null}
     </>
   );
 };

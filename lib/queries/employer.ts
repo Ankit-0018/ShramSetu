@@ -1,5 +1,5 @@
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../firebase/firebase-client";
 import { DATABASE } from "../constants/db";
 
 export const getEmployerProfile = async (employerId: string) => {

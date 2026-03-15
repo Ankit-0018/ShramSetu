@@ -1,48 +1,46 @@
-"use client"
+"use client";
 
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/lib/firebase/firebase"
-import { ReactNode, useEffect } from "react"
-import { type UserRole, useUserStore } from "@/lib/stores/useUserStore"
-import { getUserProfile } from "@/lib/queries/user"
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase/firebase-client";
+import { ReactNode, useEffect } from "react";
+import { type UserRole, useUserStore } from "@/lib/stores/useUserStore";
+import { getUserProfile } from "@/lib/queries/user";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-
-  const { setUser, setLoading, setLocation, clearLocation, clearUser } = useUserStore()
+  const { setUser, setLoading, setLocation, clearLocation, clearUser } =
+    useUserStore();
 
   useEffect(() => {
-
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-
       try {
         clearUser();
         clearLocation();
 
         if (!firebaseUser) {
-          setUser(null)
-          setLoading(false)
-          return
+          setUser(null);
+          setLoading(false);
+          return;
         }
 
         const [token, profile] = await Promise.all([
           firebaseUser.getIdTokenResult(),
-          getUserProfile(firebaseUser.uid)
-        ])
+          getUserProfile(firebaseUser.uid),
+        ]);
 
         if (!profile) {
-          console.error("User profile not found")
-          setUser(null)
-          setLoading(false)
-          return
+          console.error("User profile not found");
+          setUser(null);
+          setLoading(false);
+          return;
         }
 
-        const role = token.claims.role
+        const role = token.claims.role;
 
         if (role !== "worker" && role !== "employer") {
-          console.error("Invalid role claim")
-          setUser(null)
-          setLoading(false)
-          return
+          console.error("Invalid role claim");
+          setUser(null);
+          setLoading(false);
+          return;
         }
 
         setUser({
@@ -58,8 +56,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
           email: profile.email,
           skills: profile?.skills,
           totalEarnings: profile?.totalEarnings,
-          memberSince: profile?.memberSince
-        })
+          memberSince: profile?.memberSince,
+        });
         if (profile.location) {
           const { lat, lng, address, geohash, city } = profile.location;
           setLocation({
@@ -67,21 +65,19 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
             lng,
             address,
             geohash,
-            city
+            city,
           });
         }
       } catch (err) {
-        console.error("Auth initialization failed:", err)
-        setUser(null)
+        console.error("Auth initialization failed:", err);
+        setUser(null);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
+    });
 
-    })
+    return () => unsub();
+  }, [setUser, setLoading, setLocation]);
 
-    return () => unsub()
-
-  }, [setUser, setLoading, setLocation])
-
-  return <>{children}</>
+  return <>{children}</>;
 }

@@ -20,7 +20,7 @@ export default async function Page({
   }
 
   const employer = await getEmployerProfile(job.employerId);
-  
+
   // Serialize data to remove Firestore Timestamps
   const serializedJob = serializeFirestore(job);
   const serializedEmployer = serializeFirestore(employer);

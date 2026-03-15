@@ -2,14 +2,14 @@
 
 import { adminDb } from "@/lib/firebase/firebase-admin"
 import { FieldValue } from "firebase-admin/firestore"
-import { WorkerStatus } from "../types"
+import { WorkingStatus } from "../types"
 
 /**
  * Update worker availability
  */
 export const updateWorkerAvailability = async (
   workerId: string,
-  status: WorkerStatus
+  status: WorkingStatus
 ) => {
   await adminDb.collection("users").doc(workerId).update({
     "worker.availability": status,

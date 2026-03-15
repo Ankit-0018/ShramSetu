@@ -11,52 +11,86 @@ import {
   updateDoc,
   deleteField,
   startAt,
-  endAt
+  endAt,
 } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../firebase/firebase-client";
 import { Job } from "../types";
 import { distanceBetween, geohashQueryBounds } from "geofire-common";
 import { DATABASE } from "../constants/db";
+import { JobFilters } from "../types/job";
+
+
 
 function formatJob(docSnap: any): Job {
   const data = docSnap.data();
 
   const location = data.location
     ? {
-      ...data.location,
-      lat: data.location.lat || data.location._lat || 0,
-      lng: data.location.lng || data.location._long || 0,
-    }
+        ...data.location,
+        lat: data.location.lat || data.location._lat || 0,
+        lng: data.location.lng || data.location._long || 0,
+      }
     : null;
 
   return {
     id: docSnap.id,
     ...data,
     location,
-    createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt || null,
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || null,
-    deletedAt: data.deletedAt?.toDate?.()?.toISOString() || data.deletedAt || null,
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || data.createdAt || null,
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || null,
+    deletedAt:
+      data.deletedAt?.toDate?.()?.toISOString() || data.deletedAt || null,
   } as Job;
 }
 
-export async function getPaginatedJobs(pageSize: number = 10, lastVisibleId?: string) {
+export async function getPaginatedJobs(
+  pageSize: number = 10,
+  lastVisibleId?: string,
+  filters?: JobFilters
+) {
   try {
+
+    const constraints: any[] = [
+      where("status", "==", "open")
+    ];
+
+    // filters
+    if (filters?.advancePay) {
+      constraints.push(where("advancePay", "==", true));
+    }
+
+    if (filters?.skill) {
+      constraints.push(where("skillsRequired", "array-contains", filters.skill));
+    }
+
+    if (filters?.city) {
+      constraints.push(where("location.city", "==", filters.city));
+    }
+
+    if (filters?.minWage) {
+      constraints.push(where("wage", ">=", filters.minWage));
+    }
+
+    constraints.push(orderBy("createdAt", "desc"));
+    constraints.push(limit(pageSize));
+
     let q = query(
       collection(db, DATABASE.JOBS_COLLECTION),
-      where("status", "==", "open"),
-      orderBy("createdAt", "desc"),
-      limit(pageSize)
+      ...constraints
     );
 
     if (lastVisibleId) {
-      const lastDocSnap = await getDoc(doc(db, DATABASE.JOBS_COLLECTION, lastVisibleId));
+      const lastDocSnap = await getDoc(
+        doc(db, DATABASE.JOBS_COLLECTION, lastVisibleId)
+      );
+
       if (lastDocSnap.exists()) {
         q = query(
           collection(db, DATABASE.JOBS_COLLECTION),
-          where("status", "==", "open"),
-          orderBy("createdAt", "desc"),
-          startAfter(lastDocSnap),
-          limit(pageSize)
+          ...constraints,
+          startAfter(lastDocSnap)
         );
       }
     }
@@ -67,9 +101,12 @@ export async function getPaginatedJobs(pageSize: number = 10, lastVisibleId?: st
 
     return {
       jobs,
-      lastVisibleId: snap.docs.length ? snap.docs[snap.docs.length - 1].id : null,
+      lastVisibleId: snap.docs.length
+        ? snap.docs[snap.docs.length - 1].id
+        : null,
       hasMore: snap.docs.length === pageSize,
     };
+
   } catch (error) {
     console.error("Error fetching paginated jobs:", error);
     return { jobs: [], lastVisibleId: null, hasMore: false };
@@ -93,7 +130,7 @@ export const getEmployerJobs = async (employerId: string) => {
   const q = query(
     collection(db, DATABASE.JOBS_COLLECTION),
     where("employerId", "==", employerId),
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
   );
 
   const snap = await getDocs(q);
@@ -103,13 +140,13 @@ export const getEmployerJobs = async (employerId: string) => {
 
 export const getEmployerJobsByStatus = async (
   employerId: string,
-  status: "open" | "closed"
+  status: "open" | "closed",
 ) => {
   const q = query(
     collection(db, DATABASE.JOBS_COLLECTION),
     where("employerId", "==", employerId),
     where("status", "==", status),
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
   );
 
   const snap = await getDocs(q);
@@ -129,7 +166,7 @@ export const getOpenJobs = async () => {
   const q = query(
     collection(db, DATABASE.JOBS_COLLECTION),
     where("status", "==", "open"),
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
   );
 
   const snap = await getDocs(q);
@@ -141,7 +178,7 @@ export async function getJobsWithinRadius(
   workerLat: number,
   workerLng: number,
   city: string,
-  radiusInKm: number = 3
+  radiusInKm: number = 3,
 ) {
   const bounds = geohashQueryBounds([workerLat, workerLng], radiusInKm * 1000);
   const promises = bounds.map((b) => {
@@ -151,7 +188,7 @@ export async function getJobsWithinRadius(
       where("location.city", "==", city),
       orderBy("location.geohash"),
       startAt(b[0]),
-      endAt(b[1])
+      endAt(b[1]),
     );
 
     return getDocs(q);
@@ -173,7 +210,7 @@ export async function getJobsWithinRadius(
 
       const distanceInKm = distanceBetween(
         [workerLat, workerLng],
-        [jobLat, jobLng]
+        [jobLat, jobLng],
       );
 
       if (distanceInKm <= radiusInKm) {

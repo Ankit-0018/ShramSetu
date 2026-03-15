@@ -7,7 +7,8 @@ import { Home, Briefcase, ClipboardList, PlusCircle, User } from "lucide-react";
 export function EmployerNav() {
   const pathname = usePathname();
 
-  const isActive = (path: string) => pathname?.startsWith(path);
+  const isActive = (path: string) =>
+    pathname === path || pathname.startsWith(`${path}/`);
 
   const navItems = [
     { label: "Home", href: "/employer/home", icon: Home },

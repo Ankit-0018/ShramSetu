@@ -1,9 +1,6 @@
 import { getJobsWithinRadius, getEmployerJobs } from "./jobs";
 import { getMyApplications, getApplicationsForJob } from "./applications";
-import {
-  getMyAssignedJobs,
-  getEmployerAssignments,
-} from "./assignments";
+import { getMyAssignedJobs, getEmployerAssignments } from "./assignments";
 
 // ─── Worker Dashboard ────────────────────────────────────────────
 
@@ -11,7 +8,7 @@ export async function getWorkerDashboard(
   workerId: string,
   lat: number,
   lng: number,
-  city: string
+  city: string,
 ) {
   const [nearbyJobs, applications, assignments] = await Promise.all([
     getJobsWithinRadius(lat, lng, city, 3),
@@ -21,17 +18,18 @@ export async function getWorkerDashboard(
 
   const closestJob = nearbyJobs.length
     ? nearbyJobs.reduce((min: any, j: any) => {
-        const minDist = typeof min.distance === "number" ? min.distance : Infinity;
+        const minDist =
+          typeof min.distance === "number" ? min.distance : Infinity;
         const jDist = typeof j.distance === "number" ? j.distance : Infinity;
         return jDist < minDist ? j : min;
       })
     : null;
 
   const activeAssignments = assignments.filter(
-    (a: any) => a.status === "active"
+    (a: any) => a.status === "active",
   );
   const completedAssignments = assignments.filter(
-    (a: any) => a.status === "completed"
+    (a: any) => a.status === "completed",
   );
 
   const now = new Date();
@@ -46,7 +44,11 @@ export async function getWorkerDashboard(
 
   // Format closest job distance with proper validation
   let closestJobDistance = "N/A";
-  if (closestJob && typeof closestJob.distance === "number" && closestJob.distance !== undefined) {
+  if (
+    closestJob &&
+    typeof closestJob.distance === "number" &&
+    closestJob.distance !== undefined
+  ) {
     closestJobDistance = `${closestJob.distance.toFixed(1)} km`;
   }
 
@@ -79,25 +81,25 @@ export async function getEmployerDashboard(employerId: string) {
       jobId: job.id,
       jobTitle: job.title,
       applications: await getApplicationsForJob(job.id),
-    }))
+    })),
   );
 
   const allApplications = applicationsByJob.flatMap((b) =>
-    b.applications.map((a: any) => ({ ...a, jobTitle: b.jobTitle }))
+    b.applications.map((a: any) => ({ ...a, jobTitle: b.jobTitle })),
   );
 
   const pendingApplications = allApplications.filter(
-    (a: any) => a.status === "pending"
+    (a: any) => a.status === "pending",
   );
 
   const activeAssignments = assignments.filter(
-    (a: any) => a.status === "active"
+    (a: any) => a.status === "active",
   );
   const completedAssignments = assignments.filter(
-    (a: any) => a.status === "completed"
+    (a: any) => a.status === "completed",
   );
   const disputedAssignments = assignments.filter(
-    (a: any) => a.status === "disputed"
+    (a: any) => a.status === "disputed",
   );
 
   return {

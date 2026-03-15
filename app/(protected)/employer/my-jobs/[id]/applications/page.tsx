@@ -1,16 +1,13 @@
-import { getCurrentUser } from "@/lib/utils/auth";
 import { getApplicationsForJob } from "@/lib/queries/applications";
 import { getJobById } from "@/lib/queries/jobs";
 import ApplicationsClient from "./ApplicationsClient";
-import { redirect } from "next/navigation";
+;
 
 export default async function Page({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await getCurrentUser();
-  if (!user?.uid) redirect("/auth");
 
   const { id } = await params;
   const [job, applications] = await Promise.all([

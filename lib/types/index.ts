@@ -1,3 +1,7 @@
+
+
+export type AuthMode = "LOGIN" | "REGISTER";
+
 export type EmployerDashboardStats = {
   activeJobsCount: number;
   applicationsCount: number;
@@ -79,4 +83,4 @@ export type EmployerDashboardData = {
   disputedAssignments: Assignment[];
 };
 
-export type WorkerStatus = "available" | "busy" | "offline";
+export type WorkingStatus = "available" | "busy" | "offline";

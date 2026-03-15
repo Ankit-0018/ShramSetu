@@ -1,56 +1,45 @@
+"use client";
+
 type SpinnerProps = {
-  size?: number
-  color?: string
-  text?: string
-}
+  text?: string;
+  fullscreen?: boolean;
+};
 
-export default function Spinner({
-  size = 24,
-  color = "#3782e3",
-  text
-}: SpinnerProps) {
-
-  const dotSize = size / 6
-  const radius = size / 2 - dotSize
-
-  const dots = Array.from({ length: 8 })
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-2">
-
-      <div
-        className="relative animate-spin"
-        style={{ width: size, height: size }}
-      >
-        {dots.map((_, i) => {
-          const angle = (360 / dots.length) * i
-          const rad = (angle * Math.PI) / 180
-
-          const x = radius * Math.cos(rad) + size / 2 - dotSize / 2
-          const y = radius * Math.sin(rad) + size / 2 - dotSize / 2
-
-          return (
-            <span
-              key={i}
-              className="absolute rounded-full"
-              style={{
-                width: dotSize,
-                height: dotSize,
-                backgroundColor: color,
-                left: x,
-                top: y,
-                opacity: 0.2 + i * 0.1
-              }}
-            />
-          )
-        })}
+export default function Spinner({ text, fullscreen = true }: SpinnerProps) {
+  const spinner = (
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative w-5 h-5 animate-spin">
+        {[
+          { r: 0, c: "#E87722", o: "opacity-100" },
+          { r: 45, c: "#E87722", o: "opacity-85" },
+          { r: 90, c: "#1A6FAF", o: "opacity-70" },
+          { r: 135, c: "#1A6FAF", o: "opacity-55" },
+          { r: 180, c: "#1A6FAF", o: "opacity-40" },
+          { r: 225, c: "#1A6FAF", o: "opacity-30" },
+          { r: 270, c: "#E87722", o: "opacity-20" },
+          { r: 315, c: "#E87722", o: "opacity-10" },
+        ].map((dot, i) => (
+          <span
+            key={i}
+            className={`absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full ${dot.o}`}
+            style={{
+              backgroundColor: dot.c,
+              transform: `rotate(${dot.r}deg) translate(8px, -3px)`,
+              transformOrigin: "0 0",
+            }}
+          />
+        ))}
       </div>
 
-      {text && (
-        <p className="text-sm text-gray-600">
-          {text}
-        </p>
-      )}
+      {text && <p className="text-sm text-gray-600">{text}</p>}
     </div>
-  )
+  );
+
+  if (fullscreen) {
+    return (
+      <div className="flex items-center justify-center h-screen">{spinner}</div>
+    );
+  }
+
+  return spinner;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
@@ -16,21 +16,22 @@ import {
   User,
   Loader2,
 } from "lucide-react";
+import { getEmployerAssignments } from "@/lib/queries/assignments";
+import { useUserStore } from "@/lib/stores/useUserStore";
+import Spinner from "@/components/_shared/spinner";
 
 type Tab = "active" | "completed" | "disputed";
 
-export default function AssignmentsClient({
-  assignments,
-}: {
-  assignments: Assignment[];
-}) {
+export default function AssignmentsClient() {
   const [activeTab, setActiveTab] = useState<Tab>("active");
   const router = useRouter();
+  const {user} = useUserStore();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [showDisputeModal, setShowDisputeModal] = useState<string | null>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [disputeReason, setDisputeReason] = useState("");
   const [isPending, startTransition] = useTransition();
-
+  const [loading, setLoading] = useState<boolean>(true);
   const active = assignments.filter((a) => a.status === "active");
   const completed = assignments.filter((a) => a.status === "completed");
   const disputed = assignments.filter((a) => a.status === "disputed");
@@ -96,7 +97,23 @@ export default function AssignmentsClient({
         return "bg-gray-50 text-gray-600 border-gray-100";
     }
   };
+  useEffect(() => {
 
+    if(!user?.uid) return;
+  getEmployerAssignments(user.uid).then((res) => {
+    setAssignments(res);
+    setLoading(false)
+  });
+  },[user])
+
+
+    if (loading) {
+      return <Spinner />
+    }
+      if (!assignments) {
+      return <div className="p-6">No assignments data found</div>;
+    }
+  
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
       {/* Header */}

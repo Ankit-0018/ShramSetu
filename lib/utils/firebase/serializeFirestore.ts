@@ -1,14 +1,31 @@
-export function serializeFirestore(data: any) {
-  if (!data) return data;
+import { Timestamp } from "firebase/firestore";
 
-  return JSON.parse(
-    JSON.stringify(data, (key, value) => {
-      // Convert Firestore Timestamp → ISO string
-      if (value?._seconds !== undefined && value?._nanoseconds !== undefined) {
-        return new Date(value._seconds * 1000).toISOString();
-      }
+/*
+serialize the firestore db data to be used eg. to convert firestore Timestamp
+*/
 
-      return value;
-    })
-  );
+export function serializeFirestore<T>(data: T): T {
+  if (data === null || data === undefined) {
+    return data;
+  }
+
+  if (data instanceof Timestamp) {
+    return data.toDate() as unknown as T;
+  }
+
+  if (Array.isArray(data)) {
+    return data.map((item) => serializeFirestore(item)) as unknown as T;
+  }
+
+  if (typeof data === "object") {
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(data)) {
+      result[key] = serializeFirestore(value);
+    }
+
+    return result as T;
+  }
+
+  return data;
 }

@@ -13,7 +13,7 @@ interface LanguageStore {
   setHydrated: (hydrated: boolean) => void;
 }
 
-export const useLanguageStore = create<LanguageStore>()((
+export const useLanguageStore = create<LanguageStore>()(
   persist(
     (set) => ({
       language: "en" as Language,
@@ -33,6 +33,6 @@ export const useLanguageStore = create<LanguageStore>()((
           state.setHydrated(true);
         }
       },
-    }
-  )
-));
+    },
+  ),
+);

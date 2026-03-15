@@ -14,6 +14,7 @@ import {
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { getMyAssignedJobs } from "@/lib/queries/assignments";
 import { Assignment } from "@/lib/types";
+import Spinner from "@/components/_shared/spinner";
 
 export default function WorkerEarningsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<
@@ -42,24 +43,18 @@ export default function WorkerEarningsPage() {
 
   if (loading) {
     return (
-      <div className="worker-container flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <Spinner />
     );
   }
 
   const completedAssignments = assignments.filter(
-    (a) => a.status === "completed"
+    (a) => a.status === "completed",
   );
   const activeAssignments = assignments.filter((a) => a.status === "active");
 
   // Calculate earnings from completed assignments
   const now = new Date();
-  const todayStart = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekStart = new Date(todayStart);
   weekStart.setDate(weekStart.getDate() - 7);
   const monthStart = new Date(todayStart);
@@ -67,14 +62,12 @@ export default function WorkerEarningsPage() {
 
   const calcEarnings = (since: Date) =>
     completedAssignments
-      .filter(
-        (a) => a.completedAt && new Date(a.completedAt) >= since
-      )
+      .filter((a) => a.completedAt && new Date(a.completedAt) >= since)
       .reduce((sum, a) => sum + (a.wage ?? 0), 0);
 
   const totalEarnings = completedAssignments.reduce(
     (s, a) => s + (a.wage ?? 0),
-    0
+    0,
   );
 
   const earnings = {
@@ -106,7 +99,7 @@ export default function WorkerEarningsPage() {
     const dayStart = new Date(
       dayDate.getFullYear(),
       dayDate.getMonth(),
-      dayDate.getDate()
+      dayDate.getDate(),
     );
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
@@ -116,7 +109,7 @@ export default function WorkerEarningsPage() {
         (a) =>
           a.completedAt &&
           new Date(a.completedAt) >= dayStart &&
-          new Date(a.completedAt) < dayEnd
+          new Date(a.completedAt) < dayEnd,
       )
       .reduce((s, a) => s + (a.wage ?? 0), 0);
 
@@ -128,9 +121,7 @@ export default function WorkerEarningsPage() {
   // Recent transactions from completed assignments
   const transactions = completedAssignments.slice(0, 10).map((a) => ({
     id: a.id,
-    date: a.completedAt
-      ? new Date(a.completedAt).toLocaleDateString()
-      : "N/A",
+    date: a.completedAt ? new Date(a.completedAt).toLocaleDateString() : "N/A",
     description: a.jobTitle || "Completed Job",
     amount: a.wage ?? 0,
     status: a.status,
@@ -169,9 +160,7 @@ export default function WorkerEarningsPage() {
           <div className="bg-card text-primary rounded-lg p-6">
             <div className="flex items-center gap-2 mb-2">
               <Wallet className="w-5 h-5" />
-              <span className="text-sm opacity-90">
-                This {selectedPeriod}
-              </span>
+              <span className="text-sm opacity-90">This {selectedPeriod}</span>
             </div>
             <p className="text-4xl font-bold mb-4">
               ₹{getDisplayAmount().toLocaleString()}

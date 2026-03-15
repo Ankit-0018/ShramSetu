@@ -1,5 +1,5 @@
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { db } from "../firebase/firebase-client";
 import { DATABASE } from "../constants/db";
 import { UserData } from "../stores/useUserStore";
 
@@ -18,8 +18,7 @@ export const getUserProfile = async (uid: string): Promise<UserData | null> => {
     phone: data.phone ?? null,
     email: data.email ?? null,
 
-    memberSince:
-      data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+    memberSince: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
 
     averageRating: worker.averageRating ?? null,
     ratingCount: data.ratingCount ?? 0,

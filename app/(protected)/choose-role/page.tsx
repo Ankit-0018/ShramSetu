@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import ChooseRole from '@/components/sections/choose-role';
+import ChooseRole from "@/components/sections/choose-role";
 import recruitor from "@/assets/recruitor.jpg";
 import labour from "@/assets/labour.jpg";
-import type { Role, RoleItem } from '@/components/sections/choose-role';
-import { auth } from '@/lib/firebase/firebase';
-import { useState } from 'react';
-import { setSession } from '@/lib/utils/auth/session';
+import type { Role, RoleItem } from "@/components/sections/choose-role";
+import { auth } from "@/lib/firebase/firebase-client";
+import { useState } from "react";
+import { setSession } from "@/lib/utils/auth/session";
 
 const roles: RoleItem[] = [
   {
     imgSrc: labour,
     title: "I need work",
-    role: "worker"
+    role: "worker",
   },
   {
     imgSrc: recruitor,
     title: "I need workers",
-    role: "employer"
-  }
+    role: "employer",
+  },
 ];
 
 export default function ChooseRolePage() {
@@ -45,12 +45,12 @@ export default function ChooseRolePage() {
       const response = await fetch("/api/user/set-role", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ role: selectedRole }),
       });
-      await auth.currentUser?.getIdToken(true)
+      await auth.currentUser?.getIdToken(true);
       if (!response.ok) {
         const error = await response.json();
         alert(error.error || "Failed to set role");
@@ -68,7 +68,7 @@ export default function ChooseRolePage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
   return (
     <ChooseRole
       roles={roles}

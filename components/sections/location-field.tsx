@@ -12,27 +12,30 @@ const LiveMap = dynamic(() => import("@/components/common/LiveMap"), {
 });
 
 interface LocationFieldProps {
-  showMap?: boolean; 
+  showMap?: boolean;
 }
 
 export default function LocationField({ showMap = false }: LocationFieldProps) {
-  const {user, location , locationError ,locationLoading} = useUserStore();
-  const {  startTracking, isTracking, stopTracking } = useLiveLocation();
-  if(!user) return;
+  const { user, location, locationError, locationLoading } = useUserStore();
+  const { startTracking, isTracking, stopTracking } = useLiveLocation();
+  if (!user) return;
 
   const handleClearLocation = async () => {
     stopTracking();
     try {
       await clearLocation(user?.uid);
-      
     } catch (error) {
       alert("Failed to clear the location from db");
     }
-  
-  }
-useEffect(() => {
-console.log("User: " , user.uid + "Location: " , location + "User details: " , user)
-},[])
+  };
+  useEffect(() => {
+    console.log(
+      "User: ",
+      user.uid + "Location: ",
+      location + "User details: ",
+      user,
+    );
+  }, []);
   return (
     <div className="space-y-3">
       {/* Location display */}
@@ -40,22 +43,14 @@ console.log("User: " , user.uid + "Location: " , location + "User details: " , u
         <MapPin className="w-5 h-5 text-blue-600 shrink-0" />
 
         {locationLoading ? (
-          <span className="text-sm text-gray-600">
-            Detecting location…
-          </span>
+          <span className="text-sm text-gray-600">Detecting location…</span>
         ) : location?.address ? (
-          <span className="text-sm text-gray-900">
-            {location.address}
-          </span>
+          <span className="text-sm text-gray-900">{location.address}</span>
         ) : (
-          <span className="text-sm text-gray-600">
-            Location not selected
-          </span>
+          <span className="text-sm text-gray-600">Location not selected</span>
         )}
 
-        <span className="ml-auto text-xs text-gray-600">
-          3 km radius
-        </span>
+        <span className="ml-auto text-xs text-gray-600">3 km radius</span>
       </div>
 
       {/* Map (optional) */}
@@ -66,11 +61,7 @@ console.log("User: " , user.uid + "Location: " , location + "User details: " , u
       )}
 
       {/* Error */}
-      {locationError && (
-        <p className="text-xs text-red-600">
-          {locationError}
-        </p>
-      )}
+      {locationError && <p className="text-xs text-red-600">{locationError}</p>}
 
       {/* Action */}
       <button

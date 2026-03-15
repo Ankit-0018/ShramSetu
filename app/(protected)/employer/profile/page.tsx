@@ -17,7 +17,7 @@ import {
   LogOut,
   Building2,
 } from "lucide-react";
-import { auth, db } from "@/lib/firebase/firebase";
+import { auth, db } from "@/lib/firebase/firebase-client";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import Spinner from "@/components/_shared/spinner";
@@ -63,14 +63,19 @@ export default function EmployerProfilePage() {
             name: userData.name || "Employer Name",
             phone: auth.currentUser.phoneNumber || "Not set",
             email: userData.email || "Not set",
-            location: userData.location?.address || userData.location?.city || "Not set",
+            location:
+              userData.location?.address ||
+              userData.location?.city ||
+              "Not set",
             companyName: userData.companyName || "My Company",
             businessType: userData.businessType || "Construction",
             rating: userData.rating || 0,
             reviews: userData.reviews || 0,
             jobsPosted: dash.allJobs.length,
             activeJobs: dash.activeJobs.length,
-            memberSince: userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "Recently",
+            memberSince: userData.createdAt
+              ? new Date(userData.createdAt).toLocaleDateString()
+              : "Recently",
             isVerified: userData.isVerified || false,
           });
         }
@@ -118,7 +123,8 @@ export default function EmployerProfilePage() {
         <div className="worker-header">
           <div className="worker-header-content">
             <h1 className="worker-header-title">Profile</h1>
-            <Button
+            {/* This feature will arrive soon */}
+            {/* <Button
               variant="ghost"
               size="sm"
               className="text-primary-foreground hover:bg-primary/80"
@@ -126,7 +132,7 @@ export default function EmployerProfilePage() {
             >
               <Edit2 className="w-4 h-4 mr-1" />
               {isEditing ? "Save" : "Edit"}
-            </Button>
+            </Button> */}
           </div>
         </div>
 
@@ -157,7 +163,7 @@ export default function EmployerProfilePage() {
           {/* Contact Info */}
           <div className="bg-card rounded-lg p-4 shadow-sm space-y-4">
             <h3 className="font-semibold">Contact Information</h3>
-            
+
             <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-muted-foreground" />
               <div className="flex-1">
@@ -198,7 +204,7 @@ export default function EmployerProfilePage() {
           {/* Business Info */}
           <div className="bg-card rounded-lg p-4 shadow-sm space-y-4">
             <h3 className="font-semibold">Business Information</h3>
-            
+
             <div className="flex items-center gap-3">
               <Building2 className="w-5 h-5 text-muted-foreground" />
               <div className="flex-1">
@@ -232,11 +238,15 @@ export default function EmployerProfilePage() {
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-card rounded-lg p-4 shadow-sm text-center">
-              <p className="text-2xl font-bold text-primary">{profile.jobsPosted}</p>
+              <p className="text-2xl font-bold text-primary">
+                {profile.jobsPosted}
+              </p>
               <p className="text-xs text-muted-foreground">Jobs Posted</p>
             </div>
             <div className="bg-card rounded-lg p-4 shadow-sm text-center">
-              <p className="text-2xl font-bold text-primary">{profile.activeJobs}</p>
+              <p className="text-2xl font-bold text-primary">
+                {profile.activeJobs}
+              </p>
               <p className="text-xs text-muted-foreground">Active Jobs</p>
             </div>
           </div>
@@ -244,7 +254,8 @@ export default function EmployerProfilePage() {
           {/* Member Since */}
           <div className="bg-secondary/30 rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Member since <span className="font-medium">{profile.memberSince}</span>
+              Member since{" "}
+              <span className="font-medium">{profile.memberSince}</span>
             </p>
           </div>
         </div>
@@ -254,12 +265,12 @@ export default function EmployerProfilePage() {
           <Button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl"
+            className="w-full bg-red-600 hover:bg-red-700 text-white h-12 rounded-xl"
           >
             <LogOut className="w-4 h-4 mr-2" />
             {loggingOut ? "लॉगआउट हो रहे हैं..." : "लॉगआउट / Logout"}
           </Button>
-
+{/* 
           <Button
             variant="outline"
             className="w-full bg-transparent border-gray-300 text-gray-700 h-10 rounded-lg"
@@ -272,7 +283,7 @@ export default function EmployerProfilePage() {
             className="w-full bg-red-50 border-red-200 text-red-700 hover:bg-red-100 h-10 rounded-lg"
           >
             खाता हटाएं / Delete Account
-          </Button>
+          </Button> */}
         </div>
       </div>
 

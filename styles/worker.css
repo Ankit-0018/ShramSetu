@@ -27,8 +27,8 @@
 
 /* Worker Header */
 .worker-header {
-  background-color: #2563eb; /* blue-600 */
-  color: #fff;
+  background-color: white; /* blue-600 */
+  color: #2563eb;
   position: sticky;
   top: 0;
   z-index: 40;

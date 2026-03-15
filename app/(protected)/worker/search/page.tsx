@@ -1,32 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
-import "@/styles/worker.css";
-import { Search as SearchIcon, Filter } from "lucide-react";
-import { Job } from "@/lib/types";
-import { getOpenJobs } from "@/lib/queries/jobs";
-import { useUserStore } from "@/lib/stores/useUserStore";
 import { InfiniteJobsList } from "@/components/jobs/InfiniteJobsList";
+import { useJobStore } from "@/lib/stores/useJobStore";
+import { Search as SearchIcon, Filter } from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+import "@/styles/worker.css";
 
 export default function WorkerSearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const { user } = useUserStore();
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const filters = [
-    { label: "All", value: "all" },
-    { label: "Urgent", value: "urgent" },
-    { label: "High Pay", value: "highpay" },
-    { label: "Nearest", value: "nearest" },
-  ];
+  const setFilters = useJobStore((s) => s.setFilters);
 
   return (
     <div className="worker-container">
       <div className="worker-layout">
+
         {/* Header */}
         <div className="worker-header">
           <div className="worker-header-content">
@@ -37,8 +41,10 @@ export default function WorkerSearchPage() {
         {/* Search Bar */}
         <div className="px-4 py-3 bg-card border-b border-border sticky top-14 z-30">
           <div className="flex gap-2">
+
             <div className="flex-1 relative">
               <SearchIcon className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
+
               <Input
                 placeholder="Search jobs..."
                 value={searchQuery}
@@ -46,35 +52,95 @@ export default function WorkerSearchPage() {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" size="icon">
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setFilterOpen(true)}
+            >
               <Filter className="w-4 h-4" />
             </Button>
+
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="filter-section">
-          <div className="filter-tabs">
-            {filters?.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() =>
-                  setSelectedSkill(
-                    selectedSkill === filter.value ? null : filter.value,
-                  )
-                }
-                className={`filter-tab ${selectedSkill === filter.value ? "active" : ""}`}
+        {/* FILTER MODAL */}
+
+        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+          <DialogContent className="max-w-md">
+
+            <DialogHeader>
+              <DialogTitle>Filter Jobs</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+
+              {/* Advance Pay */}
+              <div className="flex items-center justify-between">
+                <Label>Advance Pay</Label>
+
+                <Checkbox
+                  onCheckedChange={(checked) =>
+                    setFilters({ advancePay: checked === true })
+                  }
+                />
+              </div>
+
+              {/* High Pay */}
+              <div className="flex items-center justify-between">
+                <Label>₹800+ Pay</Label>
+
+                <Checkbox
+                  onCheckedChange={(checked) =>
+                    checked
+                      ? setFilters({ minWage: 800 })
+                      : setFilters({ minWage: undefined })
+                  }
+                />
+              </div>
+
+              {/* Skill */}
+              <div className="space-y-2">
+                <Label>Skill</Label>
+
+                <select
+                  className="w-full border rounded-md p-2"
+                  onChange={(e) =>
+                    setFilters({ skill: e.target.value })
+                  }
+                >
+                  <option value="">All</option>
+                  <option value="plumber">Plumber</option>
+                  <option value="electrician">Electrician</option>
+                  <option value="mason">Mason</option>
+                </select>
+              </div>
+
+            </div>
+
+            <DialogFooter>
+
+              <Button
+                variant="outline"
+                onClick={() => setFilters({})}
               >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
+                Reset
+              </Button>
+
+              <Button onClick={() => setFilterOpen(false)}>
+                Apply Filters
+              </Button>
+
+            </DialogFooter>
+
+          </DialogContent>
+        </Dialog>
 
         {/* Jobs List */}
         <div className="px-4 py-6">
           <InfiniteJobsList searchQuery={searchQuery} />
         </div>
+
       </div>
 
       {/* Bottom Navigation */}
@@ -82,4 +148,3 @@ export default function WorkerSearchPage() {
     </div>
   );
 }
-

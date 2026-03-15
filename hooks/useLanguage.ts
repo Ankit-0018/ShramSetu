@@ -5,7 +5,8 @@ import { t as translateKey } from "@/lib/translations";
 import { useEffect, useState } from "react";
 
 export const useLanguage = () => {
-  const { language, setLanguage, toggleLanguage, isHydrated } = useLanguageStore();
+  const { language, setLanguage, toggleLanguage, isHydrated } =
+    useLanguageStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

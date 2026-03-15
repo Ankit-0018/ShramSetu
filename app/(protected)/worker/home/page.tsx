@@ -1,12 +1,56 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useUserStore } from "@/lib/stores/useUserStore";
+import "@/styles/worker.css";
 import { getWorkerDashboard } from "@/lib/queries/dashboard";
-import WorkerHomeUI from "./WorkerHomeUI";
-import { cookies } from "next/headers";
-import { verifySession } from "@/lib/utils/auth";
+import { updateWorkerAvailability } from "@/lib/actions/worker";
+import { WorkingStatus, WorkerDashboardData } from "@/lib/types";
+import WorkerHomeUI from "@/components/worker/workerHomeUI";
+import Spinner from "@/components/_shared/spinner";
 
-const Page = async () => {
-  // We can't access client state (useUserStore) from a server component.
-  // Worker home fetches dashboard data on client side using the store's user/location.
-  return <WorkerHomeUI />;
-};
+export default function WorkerHome() {
+  const { user, location} = useUserStore.getState();
+  const [workStatus, setWorkStatusState] = useState<WorkingStatus>("available");
+  const [data, setData] = useState<WorkerDashboardData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true)
 
-export default Page;
+  if (!user) return null;
+
+  const handleStatusChange = async (newStatus: WorkingStatus) => {
+    setWorkStatusState(newStatus);
+    try {
+      await updateWorkerAvailability(user.uid, newStatus);
+    } catch (error) {
+      alert("Failed to change availability");
+    }
+  };
+
+  useEffect(() => {
+    if (!user?.uid || !location?.lat || !location?.lng) return;
+
+    const loadDashboard = async () => {
+      setLoading(true);
+      try {
+        const res = await getWorkerDashboard(
+          user.uid,
+          location.lat,
+          location.lng,
+          location.city ?? "",
+        );
+        setData(res);
+      } catch (error) {
+        console.error("Error loading dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [user, location]);
+
+if(loading) <Spinner />
+
+  return (
+  <WorkerHomeUI data={data} workStatus={workStatus} onStatusChange={handleStatusChange}  />
+  );
+}

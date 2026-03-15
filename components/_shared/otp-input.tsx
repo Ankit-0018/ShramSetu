@@ -4,7 +4,7 @@ export function CustomOTPInput({
   maxLength = 6,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, change: string) => void;
   maxLength?: number;
 }) {
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -13,7 +13,7 @@ export function CustomOTPInput({
       .getData("text")
       .replace(/\D/g, "")
       .slice(0, maxLength);
-    onChange(pastedData);
+    onChange("otp", pastedData);
 
     const nextIndex = Math.min(pastedData.length - 1, maxLength - 1);
     setTimeout(() => {
@@ -27,7 +27,7 @@ export function CustomOTPInput({
 
     const arr = value.split("");
     arr[index] = digit;
-    onChange(arr.join(""));
+    onChange("otp",arr.join(""));
 
     // move forward
     if (digit && index < maxLength - 1) {
@@ -47,7 +47,7 @@ export function CustomOTPInput({
       if (arr[index]) {
         // clear current digit
         arr[index] = "";
-        onChange(arr.join(""));
+        onChange("otp",arr.join(""));
       } else if (index > 0) {
         // move backward
         requestAnimationFrame(() => {

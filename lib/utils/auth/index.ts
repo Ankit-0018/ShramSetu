@@ -1,10 +1,9 @@
-"use server"
+"use server";
 import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/firebase";
-import { adminDb , adminAuth } from "../../firebase/firebase-admin";
+import { auth } from "@/lib/firebase/firebase-client";
+import { adminDb, adminAuth } from "../../firebase/firebase-admin";
 import { cookies } from "next/headers";
 import { serializeFirestore } from "@/lib/utils/firebase/serializeFirestore";
-
 
 export async function logout() {
   try {
@@ -58,4 +57,3 @@ export async function getCurrentUser() {
     ...userData,
   };
 }
-

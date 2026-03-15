@@ -1,31 +1,68 @@
 "use client";
 
-import { Plus, Users, Briefcase, ClipboardList } from "lucide-react";
+import { Plus, Users, Briefcase, ClipboardList, BatteryWarning, MessageSquareWarning } from "lucide-react";
 import Link from "next/link";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { LanguageToggle } from "@/components/_shared/language-toggle";
 import { EmployerDashboardData, Job, Application } from "@/lib/types";
-
+import { useUserStore } from "@/lib/stores/useUserStore";
+import { useEffect, useState } from "react";
+import { getEmployerDashboard } from "@/lib/queries/dashboard";
+import Spinner from "@/components/_shared/spinner";
+import Image from "next/image";
+import Logo from "@/public/logo.png"
 type Props = {
   data: EmployerDashboardData;
 };
 
-export default function EmployerHomeUI({ data }: Props) {
-  const { stats, activeJobs, pendingApplications, activeAssignments } = data;
+export default function EmployerHomeUI() {
+  const { user } = useUserStore();
 
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    getEmployerDashboard(user.uid).then((res) => {
+      setData(res);
+      setLoading(false);
+    });
+  }, [user]);
+  
+
+  if (loading) {
+    return <Spinner />
+  }
+
+  if (!data) {
+    return <div className="p-6">No dashboard data found</div>;
+  }
+
+  const { stats, activeJobs, pendingApplications, activeAssignments } = data;
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-blue-600 text-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Labour Hub</h1>
-            <p className="text-sm text-blue-100">Employer</p>
-          </div>
-          <LanguageToggle />
-        </div>
+     <div className="sticky top-0 z-40 bg-white shadow-sm">
+  <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    
+    <div className="flex items-center gap-3">
+      <Image
+        src={Logo}
+        alt="Shram Setu"
+        width={120}
+        height={150}
+        priority
+      />
+      <div>
+        <p className="text-sm text-blue-600">Employer</p>
       </div>
+    </div>
 
+    <LanguageToggle />
+
+  </div>
+</div>
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Welcome */}
         <div className="bg-white rounded-2xl p-6 border shadow-sm">
@@ -83,12 +120,13 @@ export default function EmployerHomeUI({ data }: Props) {
             />
           </Link>
 
-          <Link href="/employer/search-workers">
+          <Link href="/employer/home">
             <ActionCard
               icon={<Users className="w-10 h-10" />}
               title="Find Workers"
-              subtitle="Search qualified workers"
+              subtitle="Search Qualified Workers"
               color="from-orange-600 to-orange-700"
+              underConstruction
             />
           </Link>
         </div>
@@ -96,9 +134,7 @@ export default function EmployerHomeUI({ data }: Props) {
         {/* Active Jobs */}
         <div className="bg-white rounded-2xl p-6 border shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold">
-              Active Jobs
-            </h3>
+            <h3 className="text-lg font-bold">Active Jobs</h3>
             <Link
               href="/employer/my-jobs"
               className="text-sm text-blue-600 font-medium"
@@ -151,9 +187,7 @@ export default function EmployerHomeUI({ data }: Props) {
         {pendingApplications.length > 0 && (
           <div className="bg-white rounded-2xl p-6 border shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">
-                Pending Applications
-              </h3>
+              <h3 className="text-lg font-bold">Pending Applications</h3>
               <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">
                 {pendingApplications.length}
               </span>
@@ -187,9 +221,7 @@ export default function EmployerHomeUI({ data }: Props) {
         {activeAssignments.length > 0 && (
           <div className="bg-white rounded-2xl p-6 border shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">
-                Active Assignments
-              </h3>
+              <h3 className="text-lg font-bold">Active Assignments</h3>
               <Link
                 href="/employer/assignments"
                 className="text-sm text-blue-600 font-medium"
@@ -207,9 +239,7 @@ export default function EmployerHomeUI({ data }: Props) {
                   <p className="font-semibold text-sm">
                     Worker: {assign.workerId}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Job: {assign.jobId}
-                  </p>
+                  <p className="text-xs text-gray-500">Job: {assign.jobId}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
                   ACTIVE
@@ -247,19 +277,30 @@ function ActionCard({
   title,
   subtitle,
   color,
+  underConstruction = false
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   color: string;
+  underConstruction?: boolean;
 }) {
   return (
     <div
       className={`bg-linear-to-br ${color} text-white rounded-2xl p-6 hover:shadow-lg transition`}
     >
       {icon}
+
       <h3 className="text-lg font-bold mt-2">{title}</h3>
+
       <p className="text-sm opacity-90">{subtitle}</p>
+
+      {underConstruction && (
+        <div className="flex items-center gap-2 mt-3 text-sm opacity-90">
+          <MessageSquareWarning size={16} />
+          <p>Feature coming soon...</p>
+        </div>
+      )}
     </div>
   );
 }

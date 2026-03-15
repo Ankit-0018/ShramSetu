@@ -218,14 +218,18 @@ export default function MyApplicationsPage() {
   );
 }
 
-function EmptyState({ icon, title, description, actionLink, actionLabel }: any) {
+function EmptyState({
+  icon,
+  title,
+  description,
+  actionLink,
+  actionLabel,
+}: any) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
       <div className="mb-4 bg-white p-4 rounded-2xl shadow-sm">{icon}</div>
       <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-500 mb-8 max-w-[200px]">
-        {description}
-      </p>
+      <p className="text-sm text-gray-500 mb-8 max-w-[200px]">{description}</p>
       <Link href={actionLink}>
         <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-xl">
           {actionLabel}

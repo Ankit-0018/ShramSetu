@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { geohashForLocation } from "geofire-common";
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/firebase";
+import { db } from "@/lib/firebase/firebase-client";
 import { prepareLocation } from "@/lib/queries/preparelocation";
 
 export async function POST(req: Request) {
