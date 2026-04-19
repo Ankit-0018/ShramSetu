@@ -3,11 +3,10 @@ import type { Metadata } from "next";
 import "../styles/globals.css";
 import "leaflet/dist/leaflet.css";
 import { getCurrentUser } from "@/lib/utils/auth";
-import UserHydrator from "@/providers/userHydrator";
 import AuthProvider from "@/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "LabourHub - Hire Trusted Labour Workers",
+  title: "ShramSetu - Hire Trusted Labour Workers",
   description:
     "Connect with trusted labour workers in your area. Plumbers, electricians, carpenters, and more.",
   generator: "v0.app",
