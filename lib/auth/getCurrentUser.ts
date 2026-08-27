@@ -9,6 +9,8 @@ export async function getCurrentUser() {
  check session and redirect and if session is there get the user document from the db
  */  
 
+
+
   const session = (await cookies()).get("session")?.value;
   if (!session) return null;
 
@@ -16,6 +18,7 @@ export async function getCurrentUser() {
 
   const uid = decoded.uid;
 
+  
   const doc = await adminDb.collection("users").doc(uid).get();
   const data = serializeFirestore(doc.data());
   return {
