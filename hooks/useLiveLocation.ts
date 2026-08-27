@@ -41,9 +41,9 @@ export function useLiveLocation() {
         setLocationLoading(true)
         await syncLocation(newLocation);
         setTracking(true);
-      } catch (err: any) {
+      } catch (err) {
         setLocationPermission("denied");
-        setLocationError(err.message);
+        setLocationError(err instanceof Error ? err.message : "Location error");
       } finally {
         setLocationLoading(false); // 🔥 stop after first fix
       }

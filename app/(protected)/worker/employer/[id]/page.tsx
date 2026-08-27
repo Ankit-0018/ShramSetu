@@ -11,16 +11,15 @@ import {
 import "@/styles/worker.css";
 
 import { useEffect, useState } from "react";
-import { getEmployerProfile } from "@/lib/queries/employer";
+import { getEmployerProfile, type PublicProfile } from "@/lib/queries/employer";
 import Spinner from "@/components/_shared/spinner";
-import type { UserData } from "@/lib/stores/useUserStore";
 
 export default function EmployerProfilePage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [employer, setEmployer] = useState<UserData | null>(null);
+  const [employer, setEmployer] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

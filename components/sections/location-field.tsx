@@ -62,7 +62,7 @@ export default function LocationField({ showMap = false }: LocationFieldProps) {
       </button>
 
       <p className="text-xs text-gray-600">
-        Automatically detected using your device's GPS.
+        Automatically detected using your device&apos;s GPS.
       </p>
     </div>
   );

@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { extractMobile } from "@/lib/utils";
 import { validateName } from "@/lib/utils/validation";
 import { AuthMode } from "@/lib/types";
-import { useUserStore } from "@/lib/stores/useUserStore";
+import { useUserStore, type UserData } from "@/lib/stores/useUserStore";
 import { apiFetch, ApiError } from "@/lib/api/client";
 
 type OTPResult = {
@@ -92,7 +92,7 @@ export function useAuthActions(mode: AuthMode) {
       setLoading(true);
 
       const result = await apiFetch<{
-        user: any;
+        user: UserData;
         accessToken: string;
         refreshToken: string;
       }>("/auth/otp/verify", {

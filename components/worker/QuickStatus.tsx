@@ -31,7 +31,7 @@ export default function QuickStats({workStatus, data}: Props) {
 
               {/* Earnings Card */}
               <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-                <p className="text-xs text-gray-600 mb-1">Today's Earnings</p>
+                <p className="text-xs text-gray-600 mb-1">Today&apos;s Earnings</p>
                 <p className="text-3xl font-bold text-green-600">
                   ₹{data?.todayEarnings ?? 0}
                 </p>

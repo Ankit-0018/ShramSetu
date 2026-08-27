@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useUserStore } from "@/lib/stores/useUserStore";
+import { useUserStore, type UserData } from "@/lib/stores/useUserStore";
 import { apiFetch, ApiError } from "@/lib/api/client";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
@@ -22,7 +22,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        const { user } = await apiFetch<{ success: boolean; user: any }>(
+        const { user } = await apiFetch<{ success: boolean; user: UserData }>(
           "/api/v1/users/me",
         );
 

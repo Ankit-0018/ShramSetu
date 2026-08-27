@@ -1,7 +1,14 @@
 import { apiFetch } from "@/lib/api/client";
+import { Application, Assignment } from "@/lib/types/job";
+
+type ApplicationStatusResponse = {
+  success: boolean;
+  message: string;
+  data: { application: Application; assignment?: Assignment };
+};
 
 export async function acceptApplication(applicationId: string) {
-  const res = await apiFetch<{ success: boolean; message: string; data: any }>(
+  const res = await apiFetch<ApplicationStatusResponse>(
     `/api/v1/jobs/applications/${applicationId}/status`,
     { method: "PATCH", body: { status: "ACCEPTED" } },
   );
@@ -10,7 +17,7 @@ export async function acceptApplication(applicationId: string) {
 }
 
 export async function rejectApplication(applicationId: string) {
-  const res = await apiFetch<{ success: boolean; message: string; data: any }>(
+  const res = await apiFetch<ApplicationStatusResponse>(
     `/api/v1/jobs/applications/${applicationId}/status`,
     { method: "PATCH", body: { status: "REJECTED" } },
   );

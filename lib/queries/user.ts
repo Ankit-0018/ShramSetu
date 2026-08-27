@@ -3,7 +3,7 @@ import { UserData } from "../stores/useUserStore";
 
 export const getUserProfile = async (): Promise<UserData | null> => {
   try {
-    const { user } = await apiFetch<{ success: boolean; user: any }>(
+    const { user } = await apiFetch<{ success: boolean; user: UserData }>(
       "/api/v1/users/me",
     );
 

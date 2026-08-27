@@ -1,6 +1,6 @@
 import { apiFetch } from "@/lib/api/client";
 import { z } from "zod";
-import { JobType } from "../types/job";
+import { EmployerJob, JobDetail } from "../types/job";
 
 const JobInputSchema = z.object({
   title: z.string().min(3).max(100),
@@ -18,7 +18,7 @@ export type JobInput = z.infer<typeof JobInputSchema>;
 export async function createJob(data: JobInput) {
   const parsed = JobInputSchema.parse(data);
 
-  const res = await apiFetch<{ success: boolean; data: any }>(
+  const res = await apiFetch<{ success: boolean; message: string; data: JobDetail }>(
     "/api/v1/jobs",
     { method: "POST", body: parsed },
   );
@@ -26,17 +26,26 @@ export async function createJob(data: JobInput) {
   return res.data;
 }
 
+export type ApplyToJobResponse = {
+  id: string;
+  jobId: string;
+  workerId: string;
+  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  createdAt: string;
+};
+
 export async function applyToJob(jobId: string) {
-  const res = await apiFetch<{ success: boolean; data: any }>(
-    `/api/v1/jobs/${jobId}/apply`,
-    { method: "POST" },
-  );
+  const res = await apiFetch<{
+    success: boolean;
+    message: string;
+    data: ApplyToJobResponse;
+  }>(`/api/v1/jobs/${jobId}/apply`, { method: "POST" });
 
   return res.data;
 }
 
 export async function deleteJob(jobId: string) {
-  const res = await apiFetch<{ success: boolean; data: any }>(
+  const res = await apiFetch<{ success: boolean; message: string; data: EmployerJob }>(
     `/api/v1/jobs/${jobId}`,
     { method: "PATCH" },
   );

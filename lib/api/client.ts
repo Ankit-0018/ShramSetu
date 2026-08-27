@@ -43,7 +43,7 @@ export type ApiOptions = {
   skipAuth?: boolean;
 };
 
-export async function apiFetch<T = any>(
+export async function apiFetch<T = unknown>(
   path: string,
   options: ApiOptions = {},
 ): Promise<T> {
