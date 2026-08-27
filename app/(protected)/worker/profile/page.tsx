@@ -27,7 +27,7 @@ export default function WorkerProfilePage() {
   const handleLogout = async () => {
     setLoggingOut(true);
     try {
-      await apiFetch("/auth/logout", { method: "POST" });
+      await apiFetch("/auth/logout", { method: "GET" });
       await fetch("/api/auth/session", { method: "DELETE" });
       clearUser();
       router.push("/auth?mode=login");

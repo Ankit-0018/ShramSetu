@@ -2,7 +2,10 @@
 
 import { useUserStore } from "@/lib/stores/useUserStore";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+// Requests go through this app's own origin (see rewrites() in
+// next.config.ts), which forwards them server-side to the backend. This
+// keeps every browser fetch same-origin, so the backend's CORS allowlist
+// never applies here.
 
 export class ApiError extends Error {
   constructor(
@@ -55,7 +58,7 @@ export async function apiFetch<T = any>(
       if (token) headers["Authorization"] = `Bearer ${token}`;
     }
 
-    return fetch(`${API_URL}${path}`, {
+    return fetch(path, {
       method,
       headers,
       body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,
