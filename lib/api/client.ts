@@ -2,6 +2,8 @@
 
 import { useUserStore } from "@/lib/stores/useUserStore";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -53,7 +55,7 @@ export async function apiFetch<T = any>(
       if (token) headers["Authorization"] = `Bearer ${token}`;
     }
 
-    return fetch(path, {
+    return fetch(`${API_URL}${path}`, {
       method,
       headers,
       body: isFormData ? (body as FormData) : body ? JSON.stringify(body) : undefined,

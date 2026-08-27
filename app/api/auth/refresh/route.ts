@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { refreshUserAccessToken } from "@/lib/server/services/auth.service";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export async function POST() {
   try {
@@ -10,8 +11,17 @@ export async function POST() {
       return NextResponse.json({ error: "No refresh token" }, { status: 401 });
     }
 
-    const { accessToken, newRefreshToken } =
-      await refreshUserAccessToken(refreshToken);
+    const backendRes = await fetch(`${API_URL}/auth/refresh`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${refreshToken}` },
+      cache: "no-store",
+    });
+
+    if (!backendRes.ok) {
+      return NextResponse.json({ error: "Refresh failed" }, { status: 401 });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = await backendRes.json();
 
     const res = NextResponse.json({ success: true, accessToken });
 
