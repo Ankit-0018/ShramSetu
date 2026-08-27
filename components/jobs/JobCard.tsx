@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Job } from "@/lib/types";
+import { NearbyJob } from "@/lib/types/job";
 import { useRouter } from "next/navigation";
 
 interface JobCardProps {
-    job: Job;
+    job: NearbyJob;
 }
 
 export function JobCard({ job }: JobCardProps) {
@@ -15,8 +15,7 @@ export function JobCard({ job }: JobCardProps) {
         router.push(`/worker/jobs/${jobId}`);
     };
 
-    const handleViewEmployer = (employer: any) => {
-        const employerId = typeof employer === "string" ? employer : employer?.id;
+    const handleViewEmployer = (employerId?: string) => {
         if (employerId) {
             router.push(`/worker/employer/${employerId}`);
         }
@@ -28,31 +27,30 @@ export function JobCard({ job }: JobCardProps) {
                 <div className="flex-1">
                     <h3 className="font-semibold text-gray-900 text-sm">{job.title}</h3>
                     <p className="text-xs text-gray-600 mt-1">
-                        {typeof job.employerId === "string"
-                            ? job.employerId
-                            : job.employerId?.id || "Unknown"}
+                        {job.employer?.name || "Unknown"}
                     </p>
                 </div>
                 <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">₹{job.wage}</p>
-                    <p className="text-xs text-gray-600">{job.duration}</p>
+                    <p className="text-lg font-bold text-green-600">₹{job.minimumWage}</p>
+                    <p className="text-xs text-gray-600">{job.jobType}</p>
                 </div>
             </div>
 
             <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                    {job.skillsRequired?.map((skill) => (
-                        <span
-                            key={skill}
-                            className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded"
-                        >
-                            {skill}
-                        </span>
-                    ))}
-                    {/* Default distance if not present */}
-                    <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded">
-                        Nearby
+                <div className="flex gap-2 flex-wrap">
+                    <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded">
+                        {job.primarySkill}
                     </span>
+                    {job.location?.formattedAddress && (
+                        <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded">
+                            {job.location.formattedAddress}
+                        </span>
+                    )}
+                    {typeof job.distanceKm === "number" && (
+                        <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded">
+                            {job.distanceKm.toFixed(1)} km
+                        </span>
+                    )}
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -66,7 +64,7 @@ export function JobCard({ job }: JobCardProps) {
                         size="sm"
                         variant="outline"
                         className="text-xs h-8"
-                        onClick={() => handleViewEmployer(job.employerId)}
+                        onClick={() => handleViewEmployer(job.employer?.id)}
                     >
                         View Employer
                     </Button>

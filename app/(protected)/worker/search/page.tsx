@@ -1,31 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
 import { InfiniteJobsList } from "@/components/jobs/InfiniteJobsList";
-import { useJobStore } from "@/lib/stores/useJobStore";
-import { Search as SearchIcon, Filter } from "lucide-react";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Search as SearchIcon } from "lucide-react";
 
 import "@/styles/worker.css";
 
 export default function WorkerSearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterOpen, setFilterOpen] = useState(false);
-
-  const setFilters = useJobStore((s) => s.setFilters);
 
   return (
     <div className="worker-container">
@@ -53,91 +37,14 @@ export default function WorkerSearchPage() {
               />
             </div>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setFilterOpen(true)}
-            >
-              <Filter className="w-4 h-4" />
-            </Button>
-
           </div>
         </div>
 
-        {/* FILTER MODAL */}
-
-        <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
-          <DialogContent className="max-w-md">
-
-            <DialogHeader>
-              <DialogTitle>Filter Jobs</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-
-              {/* Advance Pay */}
-              <div className="flex items-center justify-between">
-                <Label>Advance Pay</Label>
-
-                <Checkbox
-                  onCheckedChange={(checked) =>
-                    setFilters({ advancePay: checked === true })
-                  }
-                />
-              </div>
-
-              {/* High Pay */}
-              <div className="flex items-center justify-between">
-                <Label>₹800+ Pay</Label>
-
-                <Checkbox
-                  onCheckedChange={(checked) =>
-                    checked
-                      ? setFilters({ minWage: 800 })
-                      : setFilters({ minWage: undefined })
-                  }
-                />
-              </div>
-
-              {/* Skill */}
-              <div className="space-y-2">
-                <Label>Skill</Label>
-
-                <select
-                  className="w-full border rounded-md p-2"
-                  onChange={(e) =>
-                    setFilters({ skill: e.target.value })
-                  }
-                >
-                  <option value="">All</option>
-                  <option value="plumber">Plumber</option>
-                  <option value="electrician">Electrician</option>
-                  <option value="mason">Mason</option>
-                </select>
-              </div>
-
-            </div>
-
-            <DialogFooter>
-
-              <Button
-                variant="outline"
-                onClick={() => setFilters({})}
-              >
-                Reset
-              </Button>
-
-              <Button onClick={() => setFilterOpen(false)}>
-                Apply Filters
-              </Button>
-
-            </DialogFooter>
-
-          </DialogContent>
-        </Dialog>
-
         {/* Jobs List */}
         <div className="px-4 py-6">
+          {/* TODO: the backend's /api/v1/jobs endpoint doesn't support search
+              or filter query params yet, so filtering is done client-side
+              over the currently loaded page of jobs. */}
           <InfiniteJobsList searchQuery={searchQuery} />
         </div>
 

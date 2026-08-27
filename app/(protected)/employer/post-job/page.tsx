@@ -10,6 +10,7 @@ import { EmployerNav } from "@/components/navigation/EmployerNav";
 import LocationField from "@/components/sections/location-field";
 import { createJob } from "@/lib/actions/job";
 import { useUserStore } from "@/lib/stores/useUserStore";
+import { JobType } from "@/lib/types/job";
 
 const SKILLS = [
   { id: "labour", label: "Labour / लेबर" },
@@ -20,11 +21,10 @@ const SKILLS = [
   { id: "painter", label: "Painter / पेंटर" },
 ];
 
-const DURATIONS = [
-  { id: "4hours", label: "4 घंटे / 4 Hours" },
-  { id: "8hours", label: "8 घंटे / 8 Hours" },
-  { id: "fullday", label: "पूरा दिन / Full Day" },
-  { id: "halfday", label: "आधा दिन / Half Day" },
+const JOB_TYPES: { id: JobType; label: string }[] = [
+  { id: "ONE_TIME", label: "One Time / एक बार" },
+  { id: "PART_TIME", label: "Part Time / अंशकालिक" },
+  { id: "FULL_TIME", label: "Full Time / पूर्णकालिक" },
 ];
 
 export default function PostJobPage() {
@@ -32,9 +32,9 @@ export default function PostJobPage() {
   const { user, location } = useUserStore();
   const [formData, setFormData] = useState({
     title: "",
-    skillsRequired: [] as string[],
-    wage: "",
-    duration: "",
+    primarySkill: "",
+    minimumWage: "",
+    jobType: "" as JobType | "",
     description: "",
   });
 
@@ -50,9 +50,9 @@ export default function PostJobPage() {
 
     if (
       !formData.title ||
-      !formData.skillsRequired ||
-      !formData.wage ||
-      !formData.duration
+      !formData.primarySkill ||
+      !formData.minimumWage ||
+      !formData.jobType
     ) {
       alert("कृपया सभी आवश्यक फील्ड भरें");
       return;
@@ -69,31 +69,15 @@ export default function PostJobPage() {
     }
 
     try {
-      await createJob(
-        {
-          title: formData.title,
-          skillsRequired: formData.skillsRequired as (
-            | "labour"
-            | "mason"
-            | "carpenter"
-            | "plumber"
-            | "electrician"
-            | "painter"
-          )[],
-          wage: Number(formData.wage),
-          duration: formData.duration as
-            | "4hours"
-            | "8hours"
-            | "fullday"
-            | "halfday",
-          description: formData.description || undefined,
-          location: {
-            lat: location.lat,
-            lng: location.lng,
-          },
-        },
-        user?.uid,
-      );
+      await createJob({
+        title: formData.title,
+        primarySkill: formData.primarySkill,
+        minimumWage: Number(formData.minimumWage),
+        jobType: formData.jobType as JobType,
+        description: formData.description || undefined,
+        latitude: location.lat,
+        longitude: location.lng,
+      });
 
       alert("नौकरी पोस्ट की गई / Job posted successfully!");
       router.push("/employer/home");
@@ -136,7 +120,7 @@ export default function PostJobPage() {
               />
             </div>
 
-            {/* Skills */}
+            {/* Skill */}
             <div>
               <label className="block text-sm font-semibold mb-2">
                 आवश्यक कौशल / Skill Required *
@@ -147,15 +131,10 @@ export default function PostJobPage() {
                     key={s.id}
                     type="button"
                     onClick={() =>
-                      setFormData((p) => ({
-                        ...p,
-                        skillsRequired: p.skillsRequired.includes(s.id)
-                          ? p.skillsRequired.filter((skill) => skill !== s.id)
-                          : [...p.skillsRequired, s.id],
-                      }))
+                      setFormData((p) => ({ ...p, primarySkill: s.id }))
                     }
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      formData.skillsRequired.includes(s.id)
+                      formData.primarySkill === s.id
                         ? "border-blue-600 bg-blue-50"
                         : "border-gray-200"
                     }`}
@@ -166,26 +145,26 @@ export default function PostJobPage() {
               </div>
             </div>
 
-            {/* Duration */}
+            {/* Job Type */}
             <div>
               <label className="block text-sm font-semibold mb-2">
-                अवधि / Duration
+                काम का प्रकार / Job Type *
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                {DURATIONS.map((d) => (
+              <div className="grid grid-cols-3 gap-2">
+                {JOB_TYPES.map((jt) => (
                   <button
-                    key={d.id}
+                    key={jt.id}
                     type="button"
                     onClick={() =>
-                      setFormData((p) => ({ ...p, duration: d.id }))
+                      setFormData((p) => ({ ...p, jobType: jt.id }))
                     }
                     className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      formData.duration === d.id
+                      formData.jobType === jt.id
                         ? "border-blue-600 bg-blue-50"
                         : "border-gray-200"
                     }`}
                   >
-                    {d.label}
+                    {jt.label}
                   </button>
                 ))}
               </div>
@@ -194,12 +173,12 @@ export default function PostJobPage() {
             {/* Wage */}
             <div>
               <label className="block text-sm font-semibold mb-2">
-                मजदूरी / Wage (₹) *
+                न्यूनतम मजदूरी / Minimum Wage (₹) *
               </label>
               <Input
                 type="number"
-                name="wage"
-                value={formData.wage}
+                name="minimumWage"
+                value={formData.minimumWage}
                 onChange={handleChange}
                 required
               />

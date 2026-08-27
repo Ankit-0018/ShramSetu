@@ -1,7 +1,6 @@
 import { getApplicationsForJob } from "@/lib/queries/applications";
 import { getJobById } from "@/lib/queries/jobs";
 import ApplicationsClient from "./ApplicationsClient";
-;
 
 export default async function Page({
   params,
@@ -10,7 +9,7 @@ export default async function Page({
 }) {
 
   const { id } = await params;
-  const [job, applications] = await Promise.all([
+  const [job, applicationsRes] = await Promise.all([
     getJobById(id),
     getApplicationsForJob(id),
   ]);
@@ -23,5 +22,5 @@ export default async function Page({
     );
   }
 
-  return <ApplicationsClient job={job} applications={applications} />;
+  return <ApplicationsClient job={job} applications={applicationsRes.applications} />;
 }

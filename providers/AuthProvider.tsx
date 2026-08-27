@@ -1,83 +1,56 @@
 "use client";
 
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/lib/firebase/firebase-client";
 import { ReactNode, useEffect } from "react";
-import { type UserRole, useUserStore } from "@/lib/stores/useUserStore";
-import { getUserProfile } from "@/lib/queries/user";
+import { useUserStore } from "@/lib/stores/useUserStore";
+import { apiFetch, ApiError } from "@/lib/api/client";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const { setUser, setLoading, setLocation, clearLocation, clearUser } =
-    useUserStore();
+  const { setUser, setLoading, clearUser } = useUserStore();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+    let cancelled = false;
+
+    const hasSession = document.cookie
+      .split("; ")
+      .some((row) => row.startsWith("access_token=") || row.startsWith("refresh_token="));
+
+    if (!hasSession) {
+      clearUser();
+      setLoading(false);
+      return;
+    }
+
+    (async () => {
       try {
-        clearUser();
-        clearLocation();
+        const { user } = await apiFetch<{ success: boolean; user: any }>(
+          "/api/v1/users/me",
+        );
 
-        if (!firebaseUser) {
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        const [token, profile] = await Promise.all([
-          firebaseUser.getIdTokenResult(),
-          getUserProfile(firebaseUser.uid),
-        ]);
-
-        if (!profile) {
-          console.error("User profile not found");
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        const role = token.claims.role;
-
-        if (role !== "worker" && role !== "employer") {
-          console.error("Invalid role claim");
-          setUser(null);
-          setLoading(false);
-          return;
-        }
+        if (cancelled) return;
 
         setUser({
-          uid: firebaseUser.uid,
-          fullName: profile.fullName,
-          role: role as UserRole,
-          dailyWage: profile.dailyWage,
-          phone: profile.phone,
-          averageRating: profile?.averageRating ?? 0.0,
-          ratingCount: profile?.ratingCount ?? 0,
-          completedJobsCount: profile?.completedJobsCount ?? 0,
-          workStatus: profile.workStatus,
-          email: profile.email,
-          skills: profile?.skills,
-          totalEarnings: profile?.totalEarnings,
-          memberSince: profile?.memberSince,
+          id: user.id,
+          phoneNumber: user.phoneNumber,
+          fullName: user.fullName,
+          role: user.role,
+          isProfileCompleted: user.isProfileCompleted,
+          workerProfile: user.workerProfile,
+          employerProfile: user.employerProfile,
         });
-        if (profile.location) {
-          const { lat, lng, address, geohash, city } = profile.location;
-          setLocation({
-            lat,
-            lng,
-            address,
-            geohash,
-            city,
-          });
-        }
       } catch (err) {
-        console.error("Auth initialization failed:", err);
-        setUser(null);
+        if (!(err instanceof ApiError)) {
+          console.error("Auth initialization failed:", err);
+        }
+        if (!cancelled) setUser(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    });
+    })();
 
-    return () => unsub();
-  }, [setUser, setLoading, setLocation]);
+    return () => {
+      cancelled = true;
+    };
+  }, [setUser, setLoading, clearUser]);
 
   return <>{children}</>;
 }

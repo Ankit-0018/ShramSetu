@@ -5,13 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
-import { Assignment } from "@/lib/types";
-import { completeAssignment, disputeAssignment } from "@/lib/actions/assignment";
+import { Assignment } from "@/lib/types/job";
+import { completeAssignment, cancelAssignment } from "@/lib/actions/assignment";
 import {
   ChevronLeft,
   CheckCircle2,
-  AlertTriangle,
-  Clock,
+  XCircle,
   ClipboardList,
   User,
   Loader2,
@@ -20,28 +19,26 @@ import { getEmployerAssignments } from "@/lib/queries/assignments";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import Spinner from "@/components/_shared/spinner";
 
-type Tab = "active" | "completed" | "disputed";
+type Tab = "active" | "completed" | "cancelled";
 
 export default function AssignmentsClient() {
   const [activeTab, setActiveTab] = useState<Tab>("active");
   const router = useRouter();
-  const {user} = useUserStore();
+  const { user } = useUserStore();
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [showDisputeModal, setShowDisputeModal] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [disputeReason, setDisputeReason] = useState("");
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState<boolean>(true);
-  const active = assignments.filter((a) => a.status === "active");
-  const completed = assignments.filter((a) => a.status === "completed");
-  const disputed = assignments.filter((a) => a.status === "disputed");
+  const active = assignments.filter((a) => a.status === "IN_PROGRESS" || a.status === "PENDING");
+  const completed = assignments.filter((a) => a.status === "COMPLETED");
+  const cancelled = assignments.filter((a) => a.status === "CANCELLED");
 
   const filteredAssignments =
     activeTab === "active"
       ? active
       : activeTab === "completed"
         ? completed
-        : disputed;
+        : cancelled;
 
   const handleComplete = async (assignmentId: string) => {
     if (
@@ -64,22 +61,18 @@ export default function AssignmentsClient() {
     }
   };
 
-  const handleDispute = async (assignmentId: string) => {
-    if (!disputeReason.trim()) {
-      alert("कृपया विवाद का कारण बताएं / Please provide a reason");
+  const handleCancel = async (assignmentId: string) => {
+    if (!confirm("क्या आप इस काम को रद्द करना चाहते हैं? / Cancel this assignment?"))
       return;
-    }
 
     try {
       setProcessingId(assignmentId);
-      await disputeAssignment(assignmentId, disputeReason);
-      setShowDisputeModal(null);
-      setDisputeReason("");
+      await cancelAssignment(assignmentId);
       startTransition(() => {
         router.refresh();
       });
     } catch (error: any) {
-      alert(error.message || "Failed to dispute assignment");
+      alert(error.message || "Failed to cancel assignment");
     } finally {
       setProcessingId(null);
     }
@@ -87,33 +80,30 @@ export default function AssignmentsClient() {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "active":
+      case "IN_PROGRESS":
+      case "PENDING":
         return "bg-green-50 text-green-600 border-green-100";
-      case "completed":
+      case "COMPLETED":
         return "bg-blue-50 text-blue-600 border-blue-100";
-      case "disputed":
+      case "CANCELLED":
         return "bg-orange-50 text-orange-600 border-orange-100";
       default:
         return "bg-gray-50 text-gray-600 border-gray-100";
     }
   };
+
   useEffect(() => {
+    if (!user) return;
+    getEmployerAssignments(1, 50).then((res) => {
+      setAssignments(res.assignments);
+      setLoading(false);
+    });
+  }, [user]);
 
-    if(!user?.uid) return;
-  getEmployerAssignments(user.uid).then((res) => {
-    setAssignments(res);
-    setLoading(false)
-  });
-  },[user])
+  if (loading) {
+    return <Spinner />;
+  }
 
-
-    if (loading) {
-      return <Spinner />
-    }
-      if (!assignments) {
-      return <div className="p-6">No assignments data found</div>;
-    }
-  
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
       {/* Header */}
@@ -153,14 +143,14 @@ export default function AssignmentsClient() {
             पूरा / Done ({completed.length})
           </button>
           <button
-            onClick={() => setActiveTab("disputed")}
+            onClick={() => setActiveTab("cancelled")}
             className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "disputed"
+              activeTab === "cancelled"
                 ? "bg-white text-orange-600 shadow-sm"
                 : "text-gray-500"
             }`}
           >
-            विवाद / Disputed ({disputed.length})
+            रद्द / Cancelled ({cancelled.length})
           </button>
         </div>
       </div>
@@ -179,15 +169,15 @@ export default function AssignmentsClient() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-sm">
-                      Worker: {assign.workerId}
+                      Worker: {assign.worker?.user.fullName || assign.workerId}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Job: {assign.jobId}
+                      Job: {assign.job?.title || assign.jobId}
                     </p>
                     <p className="text-xs text-gray-400">
                       Assigned:{" "}
-                      {assign.assignedAt
-                        ? new Date(assign.assignedAt).toLocaleDateString()
+                      {assign.createdAt
+                        ? new Date(assign.createdAt).toLocaleDateString()
                         : "Recently"}
                     </p>
                   </div>
@@ -199,26 +189,8 @@ export default function AssignmentsClient() {
                 </span>
               </div>
 
-              {/* Dispute reason if disputed */}
-              {assign.status === "disputed" && assign.disputeReason && (
-                <div className="bg-orange-50 rounded-lg p-3 mb-4 text-sm text-orange-800">
-                  <p className="font-medium text-xs mb-1">Dispute Reason:</p>
-                  <p className="text-xs">{assign.disputeReason}</p>
-                </div>
-              )}
-
-              {/* Completed info */}
-              {assign.status === "completed" && assign.completedAt && (
-                <div className="bg-green-50 rounded-lg p-3 mb-4 text-sm text-green-800">
-                  <p className="text-xs">
-                    Completed on:{" "}
-                    {new Date(assign.completedAt).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
-
               {/* Actions for active assignments */}
-              {assign.status === "active" && (
+              {(assign.status === "IN_PROGRESS" || assign.status === "PENDING") && (
                 <div className="flex gap-3">
                   <Button
                     className="flex-1 bg-green-600 hover:bg-green-700 h-10 text-sm"
@@ -235,50 +207,12 @@ export default function AssignmentsClient() {
                   <Button
                     variant="outline"
                     className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50 h-10 text-sm"
-                    onClick={() => setShowDisputeModal(assign.id)}
+                    onClick={() => handleCancel(assign.id)}
                     disabled={processingId === assign.id}
                   >
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    विवाद / Dispute
+                    <XCircle className="w-4 h-4 mr-2" />
+                    रद्द / Cancel
                   </Button>
-                </div>
-              )}
-
-              {/* Dispute Modal */}
-              {showDisputeModal === assign.id && (
-                <div className="mt-4 bg-orange-50 rounded-xl p-4 border border-orange-200">
-                  <h4 className="font-semibold text-sm mb-2">
-                    विवाद का कारण / Dispute Reason
-                  </h4>
-                  <textarea
-                    value={disputeReason}
-                    onChange={(e) => setDisputeReason(e.target.value)}
-                    placeholder="कृपया कारण बताएं / Please provide a reason..."
-                    className="w-full border rounded-lg px-3 py-2 text-sm mb-3"
-                    rows={3}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1 bg-orange-600 hover:bg-orange-700 h-9 text-sm"
-                      onClick={() => handleDispute(assign.id)}
-                      disabled={processingId === assign.id}
-                    >
-                      {processingId === assign.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      ) : null}
-                      Submit Dispute
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-9 text-sm"
-                      onClick={() => {
-                        setShowDisputeModal(null);
-                        setDisputeReason("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
                 </div>
               )}
             </div>
@@ -296,7 +230,7 @@ export default function AssignmentsClient() {
                 ? "No active assignments"
                 : activeTab === "completed"
                   ? "No completed assignments"
-                  : "No disputed assignments"}
+                  : "No cancelled assignments"}
             </p>
           </div>
         )}

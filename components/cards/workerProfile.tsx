@@ -2,6 +2,7 @@ import { useUserStore } from "@/lib/stores/useUserStore";
 
 export default function WorkerProfile() {
     const {user} = useUserStore();
+    const workerProfile = user?.workerProfile;
     return (
         <>
          {/* Profile Summary Card */}
@@ -13,7 +14,7 @@ export default function WorkerProfile() {
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-600">Skill</span>
                 <div className="flex gap-1 flex-wrap justify-end">
-                  {user?.skills?.map((skill, idx) => (
+                  {workerProfile?.skills?.map((skill, idx) => (
                     <span
                       key={idx}
                       className="text-sm font-semibold text-gray-900"
@@ -24,23 +25,13 @@ export default function WorkerProfile() {
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-600">Daily Rate</span>
+                <span className="text-xs text-gray-600">Minimum Wage</span>
                 <span className="text-sm font-semibold text-gray-900">
-                  ₹{user?.dailyWage}
+                  ₹{workerProfile?.minimumWage ?? "N/A"}
                 </span>
               </div>
-              <div className="border-t border-gray-200 pt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-600">Jobs Done</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  {user?.completedJobsCount}
-                </span>
-              </div>
-              <div className="border-t border-gray-200 pt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-600">Rating</span>
-                <span className="text-sm font-semibold text-yellow-500">
-                  {user?.averageRating} ⭐ ({user?.ratingCount})
-                </span>
-              </div>
+              {/* TODO: jobs-completed count and rating aren't exposed by the
+                  backend yet, so those stats are hidden rather than faked. */}
             </div>
           </div>
         </>

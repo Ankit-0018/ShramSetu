@@ -9,7 +9,7 @@ export default async function WorkerLayout({
 }) {
   return (
     <>
-      <RoleGuard role="worker">{children}</RoleGuard>
+      <RoleGuard role="WORKER">{children}</RoleGuard>
     </>
   );
 }

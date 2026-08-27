@@ -1,8 +1,7 @@
 "use client";
 
-import { db, auth } from "@/lib/firebase/firebase-client";
 import { useUserStore } from "@/lib/stores/useUserStore";
-import { doc, updateDoc } from "firebase/firestore";
+import { apiFetch, ApiError } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,8 +18,11 @@ const skillsList = [
 const InfoPage = () => {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [dailyWage, setDailyWage] = useState("");
-  const { user } = useUserStore();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user, setUser } = useUserStore();
   const router = useRouter();
+
   const toggleSkill = (skill: string) => {
     if (selectedSkills.includes(skill)) {
       setSelectedSkills(selectedSkills.filter((s) => s !== skill));
@@ -31,30 +33,59 @@ const InfoPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      skills: selectedSkills,
-      dailyWage: Number(dailyWage),
-      availability: "available",
-    };
     if (!user) return;
 
-    await updateDoc(doc(db, "users", user.uid), {
-      profileCompleted: true,
-      worker: payload,
-    });
-
-    // Refresh session cookie so middleware knows profile is complete
-    if (auth.currentUser) {
-      const token = await auth.currentUser.getIdToken(true);
-      await fetch("/api/auth/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
+    if (selectedSkills.length === 0) {
+      setError("Pick at least one skill");
+      return;
+    }
+    if (!dailyWage || Number(dailyWage) <= 0) {
+      setError("Enter a valid daily wage");
+      return;
     }
 
-    router.push("/worker/home");
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const result = await apiFetch<{
+        success: boolean;
+        data: { user: any };
+      }>("/api/v1/users/profile", {
+        method: "POST",
+        body: {
+          role: "WORKER",
+          skills: selectedSkills,
+          dailyWage: Number(dailyWage),
+        },
+      });
+
+      setUser({
+        ...user,
+        role: "WORKER",
+        isProfileCompleted: true,
+        workerProfile: {
+          id: result.data.user.id,
+          skills: result.data.user.skills,
+          canRelocate: result.data.user.canRelocate,
+          minimumWage: result.data.user.minimumWage,
+          profilePhotoUrl: result.data.user.profilePhotoUrl,
+        },
+      });
+
+      await fetch("/api/auth/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "WORKER", isProfileCompleted: true }),
+      });
+
+      router.push("/worker/home");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Failed to save profile");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -97,12 +128,15 @@ const InfoPage = () => {
           />
         </div>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-black text-white py-2 rounded"
+          disabled={submitting}
+          className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
         >
-          Save
+          {submitting ? "Saving..." : "Save"}
         </button>
       </form>
     </div>

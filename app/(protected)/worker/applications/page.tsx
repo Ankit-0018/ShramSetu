@@ -18,7 +18,7 @@ import {
 import "@/styles/worker.css";
 import Link from "next/link";
 import Spinner from "@/components/_shared/spinner";
-import { Application, Assignment } from "@/lib/types";
+import { Application, Assignment } from "@/lib/types/job";
 
 type Tab = "applications" | "assignments";
 
@@ -30,17 +30,17 @@ export default function MyApplicationsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user) return;
 
     const fetchData = async () => {
       setLoading(true);
       try {
         const [appsRes, assignsRes] = await Promise.all([
-          getMyApplications(user.uid),
-          getMyAssignedJobs(user.uid),
+          getMyApplications(1, 20),
+          getMyAssignedJobs(1, 20),
         ]);
-        setApplications(appsRes);
-        setAssignments(assignsRes);
+        setApplications(appsRes.applications);
+        setAssignments(assignsRes.assignments);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -52,18 +52,18 @@ export default function MyApplicationsPage() {
   }, [user]);
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
+    switch (status) {
+      case "PENDING":
         return "text-yellow-600 bg-yellow-50 border-yellow-100";
-      case "accepted":
+      case "ACCEPTED":
         return "text-green-600 bg-green-50 border-green-100";
-      case "rejected":
+      case "REJECTED":
         return "text-red-600 bg-red-50 border-red-100";
-      case "completed":
+      case "COMPLETED":
         return "text-blue-600 bg-blue-50 border-blue-100";
-      case "active":
+      case "IN_PROGRESS":
         return "text-green-600 bg-green-50 border-green-100";
-      case "disputed":
+      case "CANCELLED":
         return "text-orange-600 bg-orange-50 border-orange-100";
       default:
         return "text-gray-600 bg-gray-50 border-gray-100";
@@ -71,15 +71,15 @@ export default function MyApplicationsPage() {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "pending":
+    switch (status) {
+      case "PENDING":
         return <Clock className="w-3 h-3 mr-1" />;
-      case "accepted":
-      case "active":
+      case "ACCEPTED":
+      case "IN_PROGRESS":
         return <CheckCircle2 className="w-3 h-3 mr-1" />;
-      case "rejected":
+      case "REJECTED":
         return <XCircle className="w-3 h-3 mr-1" />;
-      case "completed":
+      case "COMPLETED":
         return <CheckCircle2 className="w-3 h-3 mr-1" />;
       default:
         return null;
@@ -133,10 +133,10 @@ export default function MyApplicationsPage() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h3 className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
-                        {app.jobTitle || "Job Application"}
+                        {app.job?.title || "Job Application"}
                       </h3>
                       <p className="text-xs text-gray-500 mt-1">
-                        ID: {app.jobId}
+                        {app.job?.location?.formattedAddress}
                       </p>
                     </div>
                     <div
@@ -176,10 +176,10 @@ export default function MyApplicationsPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-bold text-gray-900 text-sm">
-                      {assign.jobTitle || "Assigned Task"}
+                      {assign.job?.title || "Assigned Task"}
                     </h3>
                     <p className="text-xs text-gray-600 mt-1">
-                      Employer: {assign.employerId}
+                      {assign.job?.location?.formattedAddress}
                     </p>
                   </div>
                   <div
@@ -192,8 +192,8 @@ export default function MyApplicationsPage() {
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
                   <div className="text-xs text-gray-500">
                     Assigned:{" "}
-                    {assign.assignedAt
-                      ? new Date(assign.assignedAt).toLocaleDateString()
+                    {assign.createdAt
+                      ? new Date(assign.createdAt).toLocaleDateString()
                       : "recently"}
                   </div>
                   <Button size="sm" variant="outline" className="text-xs h-8">

@@ -4,8 +4,6 @@ import { useLiveLocation } from "@/hooks/useLiveLocation";
 import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useUserStore } from "@/lib/stores/useUserStore";
-import { clearLocation } from "@/lib/actions/location";
-import { useEffect } from "react";
 
 const LiveMap = dynamic(() => import("@/components/common/LiveMap"), {
   ssr: false,
@@ -20,22 +18,9 @@ export default function LocationField({ showMap = false }: LocationFieldProps) {
   const { startTracking, isTracking, stopTracking } = useLiveLocation();
   if (!user) return;
 
-  const handleClearLocation = async () => {
+  const handleClearLocation = () => {
     stopTracking();
-    try {
-      await clearLocation(user?.uid);
-    } catch (error) {
-      alert("Failed to clear the location from db");
-    }
   };
-  useEffect(() => {
-    console.log(
-      "User: ",
-      user.uid + "Location: ",
-      location + "User details: ",
-      user,
-    );
-  }, []);
   return (
     <div className="space-y-3">
       {/* Location display */}

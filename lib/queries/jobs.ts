@@ -1,227 +1,52 @@
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  limit,
-  orderBy,
-  startAfter,
-  doc,
-  getDoc,
-  updateDoc,
-  deleteField,
-  startAt,
-  endAt,
-} from "firebase/firestore";
-import { db } from "../firebase/firebase-client";
-import { Job } from "../types";
-import { distanceBetween, geohashQueryBounds } from "geofire-common";
-import { DATABASE } from "../constants/db";
-import { JobFilters } from "../types/job";
+import { apiFetch, ApiError } from "@/lib/api/client";
+import { EmployerJob, JobDetail, NearbyJob, Pagination } from "../types/job";
 
+const EMPTY_JOBS_PAGE = (page: number, limit: number) => ({
+  jobs: [] as NearbyJob[],
+  pagination: { total: 0, page, limit, totalPages: 1 },
+  hasMore: false,
+});
 
-
-function formatJob(docSnap: any): Job {
-  const data = docSnap.data();
-
-  const location = data.location
-    ? {
-        ...data.location,
-        lat: data.location.lat || data.location._lat || 0,
-        lng: data.location.lng || data.location._long || 0,
-      }
-    : null;
-
-  return {
-    id: docSnap.id,
-    ...data,
-    location,
-    createdAt:
-      data.createdAt?.toDate?.()?.toISOString() || data.createdAt || null,
-    updatedAt:
-      data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || null,
-    deletedAt:
-      data.deletedAt?.toDate?.()?.toISOString() || data.deletedAt || null,
-  } as Job;
-}
-
-export async function getPaginatedJobs(
-  pageSize: number = 10,
-  lastVisibleId?: string,
-  filters?: JobFilters
-) {
+export async function getPaginatedJobs(page: number = 1, limit: number = 10) {
   try {
-
-    const constraints: any[] = [
-      where("status", "==", "open")
-    ];
-
-    // filters
-    if (filters?.advancePay) {
-      constraints.push(where("advancePay", "==", true));
-    }
-
-    if (filters?.skill) {
-      constraints.push(where("skillsRequired", "array-contains", filters.skill));
-    }
-
-    if (filters?.city) {
-      constraints.push(where("location.city", "==", filters.city));
-    }
-
-    if (filters?.minWage) {
-      constraints.push(where("wage", ">=", filters.minWage));
-    }
-
-    constraints.push(orderBy("createdAt", "desc"));
-    constraints.push(limit(pageSize));
-
-    let q = query(
-      collection(db, DATABASE.JOBS_COLLECTION),
-      ...constraints
-    );
-
-    if (lastVisibleId) {
-      const lastDocSnap = await getDoc(
-        doc(db, DATABASE.JOBS_COLLECTION, lastVisibleId)
-      );
-
-      if (lastDocSnap.exists()) {
-        q = query(
-          collection(db, DATABASE.JOBS_COLLECTION),
-          ...constraints,
-          startAfter(lastDocSnap)
-        );
-      }
-    }
-
-    const snap = await getDocs(q);
-
-    const jobs = snap.docs.map(formatJob);
+    const res = await apiFetch<{
+      success: boolean;
+      data: { jobs: NearbyJob[]; pagination: Pagination };
+    }>(`/api/v1/jobs?page=${page}&limit=${limit}`);
 
     return {
-      jobs,
-      lastVisibleId: snap.docs.length
-        ? snap.docs[snap.docs.length - 1].id
-        : null,
-      hasMore: snap.docs.length === pageSize,
+      jobs: res.data.jobs,
+      pagination: res.data.pagination,
+      hasMore: res.data.pagination.page < res.data.pagination.totalPages,
     };
-
   } catch (error) {
+    // Worker hasn't shared their location yet — expected state for a
+    // fresh/opted-out worker, not a real error. Just show no nearby jobs.
+    if (error instanceof ApiError && error.status === 400) {
+      return EMPTY_JOBS_PAGE(page, limit);
+    }
     console.error("Error fetching paginated jobs:", error);
-    return { jobs: [], lastVisibleId: null, hasMore: false };
+    return EMPTY_JOBS_PAGE(page, limit);
   }
 }
 
-export async function getJobById(id: string): Promise<Job | null> {
+export async function getJobById(id: string): Promise<JobDetail | null> {
   try {
-    const docSnap = await getDoc(doc(db, DATABASE.JOBS_COLLECTION, id));
-
-    if (!docSnap.exists()) return null;
-
-    return formatJob(docSnap);
+    const res = await apiFetch<{ success: boolean; data: JobDetail }>(
+      `/api/v1/jobs/${id}`,
+    );
+    return res.data;
   } catch (error) {
     console.error("Error fetching job by id:", error);
     return null;
   }
 }
 
-export const getEmployerJobs = async (employerId: string) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_COLLECTION),
-    where("employerId", "==", employerId),
-    orderBy("createdAt", "desc"),
-  );
+export const getEmployerJobs = async (page: number = 1, limit: number = 10) => {
+  const res = await apiFetch<{
+    success: boolean;
+    data: { jobs: EmployerJob[]; pagination: Pagination };
+  }>(`/api/v1/employers/jobs?page=${page}&limit=${limit}`);
 
-  const snap = await getDocs(q);
-
-  return snap.docs.map(formatJob);
+  return res.data;
 };
-
-export const getEmployerJobsByStatus = async (
-  employerId: string,
-  status: "open" | "closed",
-) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_COLLECTION),
-    where("employerId", "==", employerId),
-    where("status", "==", status),
-    orderBy("createdAt", "desc"),
-  );
-
-  const snap = await getDocs(q);
-
-  return snap.docs.map(formatJob);
-};
-
-export async function clearLocation(userId: string) {
-  const ref = doc(db, DATABASE.USERS_COLLECTION, userId);
-
-  await updateDoc(ref, {
-    location: deleteField(),
-  });
-}
-
-export const getOpenJobs = async () => {
-  const q = query(
-    collection(db, DATABASE.JOBS_COLLECTION),
-    where("status", "==", "open"),
-    orderBy("createdAt", "desc"),
-  );
-
-  const snap = await getDocs(q);
-
-  return snap.docs.map(formatJob);
-};
-
-export async function getJobsWithinRadius(
-  workerLat: number,
-  workerLng: number,
-  city: string,
-  radiusInKm: number = 3,
-) {
-  const bounds = geohashQueryBounds([workerLat, workerLng], radiusInKm * 1000);
-  const promises = bounds.map((b) => {
-    const q = query(
-      collection(db, DATABASE.JOBS_COLLECTION),
-      where("status", "==", "open"),
-      where("location.city", "==", city),
-      orderBy("location.geohash"),
-      startAt(b[0]),
-      endAt(b[1]),
-    );
-
-    return getDocs(q);
-  });
-
-  const snapshots = await Promise.all(promises);
-
-  const matchingJobs: Job[] = [];
-  const seen = new Set();
-
-  snapshots.forEach((snap) => {
-    snap.docs.forEach((docSnap) => {
-      const job = docSnap.data();
-
-      if (seen.has(docSnap.id)) return;
-
-      const jobLat = job.location.lat;
-      const jobLng = job.location.lng;
-
-      const distanceInKm = distanceBetween(
-        [workerLat, workerLng],
-        [jobLat, jobLng],
-      );
-
-      if (distanceInKm <= radiusInKm) {
-        seen.add(docSnap.id);
-        matchingJobs.push({
-          ...formatJob(docSnap),
-          distance: distanceInKm,
-        } as any);
-      }
-    });
-  });
-
-  return matchingJobs;
-}

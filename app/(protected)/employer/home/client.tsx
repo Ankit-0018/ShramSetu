@@ -1,35 +1,33 @@
 "use client";
 
-import { Plus, Users, Briefcase, ClipboardList, BatteryWarning, MessageSquareWarning } from "lucide-react";
+import { Plus, Users, Briefcase, ClipboardList, MessageSquareWarning } from "lucide-react";
 import Link from "next/link";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { LanguageToggle } from "@/components/_shared/language-toggle";
-import { EmployerDashboardData, Job, Application } from "@/lib/types";
+import { EmployerDashboardData } from "@/lib/types";
+import { EmployerJob, Application } from "@/lib/types/job";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { useEffect, useState } from "react";
 import { getEmployerDashboard } from "@/lib/queries/dashboard";
 import Spinner from "@/components/_shared/spinner";
 import Image from "next/image";
 import Logo from "@/public/logo.png"
-type Props = {
-  data: EmployerDashboardData;
-};
 
 export default function EmployerHomeUI() {
   const { user } = useUserStore();
 
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<EmployerDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.uid) return;
+    if (!user) return;
 
-    getEmployerDashboard(user.uid).then((res) => {
+    getEmployerDashboard().then((res) => {
       setData(res);
       setLoading(false);
     });
   }, [user]);
-  
+
 
   if (loading) {
     return <Spinner />
@@ -45,7 +43,7 @@ export default function EmployerHomeUI() {
       {/* Header */}
      <div className="sticky top-0 z-40 bg-white shadow-sm">
   <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-    
+
     <div className="flex items-center gap-3">
       <Image
         src={Logo}
@@ -144,7 +142,7 @@ export default function EmployerHomeUI() {
           </div>
 
           {activeJobs.length > 0 ? (
-            activeJobs.slice(0, 5).map((job: Job) => (
+            activeJobs.slice(0, 5).map((job: EmployerJob) => (
               <Link
                 key={job.id}
                 href={`/employer/my-jobs/${job.id}/applications`}
@@ -155,24 +153,12 @@ export default function EmployerHomeUI() {
                     <h4 className="font-semibold group-hover:text-blue-600 transition-colors">
                       {job.title}
                     </h4>
-                    <p className="text-sm text-gray-600">
-                      {job.description?.substring(0, 60)}
-                    </p>
+                    <p className="text-sm text-gray-600">{job.primarySkill}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-green-600">₹{job.wage}</p>
-                    <p className="text-xs text-gray-600">{job.duration}</p>
+                    <p className="font-bold text-green-600">₹{job.minimumWage}</p>
+                    <p className="text-xs text-gray-600">{job.jobType}</p>
                   </div>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {job.skillsRequired?.map((skill) => (
-                    <span
-                      key={skill}
-                      className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium"
-                    >
-                      {skill}
-                    </span>
-                  ))}
                 </div>
               </Link>
             ))
@@ -202,10 +188,10 @@ export default function EmployerHomeUI() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="font-semibold text-sm">
-                      {app.jobTitle || "Job Application"}
+                      {app.job?.title || "Job Application"}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Worker: {app.workerId}
+                      Worker: {app.worker?.user.fullName || app.workerId}
                     </p>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-yellow-50 text-yellow-600 border border-yellow-100">
@@ -230,16 +216,16 @@ export default function EmployerHomeUI() {
               </Link>
             </div>
 
-            {activeAssignments.slice(0, 3).map((assign: any) => (
+            {activeAssignments.slice(0, 3).map((assign) => (
               <div
                 key={assign.id}
                 className="border rounded-lg p-4 mb-3 flex justify-between items-center"
               >
                 <div>
                   <p className="font-semibold text-sm">
-                    Worker: {assign.workerId}
+                    Worker: {assign.worker?.user.fullName || assign.workerId}
                   </p>
-                  <p className="text-xs text-gray-500">Job: {assign.jobId}</p>
+                  <p className="text-xs text-gray-500">Job: {assign.job?.title || assign.jobId}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
                   ACTIVE

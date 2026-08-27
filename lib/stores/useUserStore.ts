@@ -1,34 +1,48 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type UserRole = "worker" | "employer";
+export type UserRole = "WORKER" | "EMPLOYER";
 
-export type UserData = {
-  uid: string;
-  fullName: string;
-  role: UserRole;
-  workStatus?: string;
-  skills?: string[];
-  phone: number;
-  email?: string;
-  dailyWage: number;
-  ratingCount: number;
-  averageRating: number;
-  completedJobsCount: number;
-  totalEarnings: number;
-  memberSince: string;
-  location?: Location | null;
+export type WorkerProfile = {
+  id: string;
+  age?: number | null;
+  profilePhotoUrl?: string | null;
+  skills: string[];
+  canRelocate: boolean;
+  minimumWage?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  formattedAddress?: string | null;
+  cityId?: string | null;
 };
 
-type Location = {
-  lat: number;
-  lng: number;
-  address?: string;
-  geohash?: string;
-  city?: string;
+export type EmployerProfile = {
+  id: string;
+  age?: number | null;
+  profilePhotoUrl?: string | null;
+  employerType: "INDIVIDUAL" | "BUSINESS";
+  businessName?: string | null;
+  gstNumber?: string | null;
+};
+
+export type UserData = {
+  id: string;
+  phoneNumber: string;
+  fullName: string;
+  role: UserRole | null;
+  isProfileCompleted: boolean;
+  workerProfile: WorkerProfile | null;
+  employerProfile: EmployerProfile | null;
 };
 
 type PermissionState = "granted" | "denied" | "prompt";
+
+export type Location = {
+  lat: number;
+  lng: number;
+  address?: string | null;
+  city?: string | null;
+};
 
 type AppStore = {
   hydrated: boolean;
@@ -64,7 +78,7 @@ export const useUserStore = create<AppStore>()(
       setUser: (user) => set({ user }),
       loading: true,
       setLoading: (loading) => {
-        set({loading})
+        set({ loading });
       },
       clearUser: () => set({ user: null, location: null }),
 
@@ -75,14 +89,8 @@ export const useUserStore = create<AppStore>()(
       isTracking: false,
 
       setLocation: (location) =>
-        set({
-          location,
-          locationLoading: false,
-          locationError: null,
-        }),
-
+        set({ location, locationLoading: false, locationError: null }),
       clearLocation: () => set({ location: null }),
-
       setLocationLoading: (loading) => set({ locationLoading: loading }),
       setLocationPermission: (perm) => set({ locationPermission: perm }),
       setLocationError: (error) =>
@@ -90,7 +98,7 @@ export const useUserStore = create<AppStore>()(
           locationError: error,
           locationLoading: false,
         }),
-        setTracking: (isTracking) => set({isTracking: isTracking})
+      setTracking: (isTracking) => set({ isTracking }),
     }),
     {
       name: "labour-hub-storage",
@@ -104,6 +112,6 @@ export const useUserStore = create<AppStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();
       },
-    }
-  )
+    },
+  ),
 );

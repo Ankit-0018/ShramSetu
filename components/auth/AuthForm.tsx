@@ -14,7 +14,6 @@ export default function AuthForm({
   const {formData, formError, handleSubmit, handleInputChange, confirmationResult, loading, isPending } = useAuthActions(mode);
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div id="recaptcha-container" className="mt-4"></div>
       {mode === "REGISTER" && !confirmationResult && (
         <div className="relative space-y-2">
           <label className="block text-sm font-medium text-black">

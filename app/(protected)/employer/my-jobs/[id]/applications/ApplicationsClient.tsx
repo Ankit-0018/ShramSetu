@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
-import { Job, Application } from "@/lib/types";
+import { JobDetail, Application } from "@/lib/types/job";
 import { acceptApplication, rejectApplication } from "@/lib/actions/application";
 import {
   ChevronLeft,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 type Props = {
-  job: Job;
+  job: JobDetail;
   applications: Application[];
 };
 
@@ -68,19 +68,19 @@ export default function ApplicationsClient({ job, applications }: Props) {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "pending":
+      case "PENDING":
         return "bg-yellow-50 text-yellow-600 border-yellow-100";
-      case "accepted":
+      case "ACCEPTED":
         return "bg-green-50 text-green-600 border-green-100";
-      case "rejected":
+      case "REJECTED":
         return "bg-red-50 text-red-600 border-red-100";
       default:
         return "bg-gray-50 text-gray-600 border-gray-100";
     }
   };
 
-  const pendingApps = applications.filter((a) => a.status === "pending");
-  const processedApps = applications.filter((a) => a.status !== "pending");
+  const pendingApps = applications.filter((a) => a.status === "PENDING");
+  const processedApps = applications.filter((a) => a.status !== "PENDING");
 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
@@ -97,7 +97,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
             <p className="text-sm text-blue-100 truncate">{job.title}</p>
           </div>
           <span className="bg-blue-500 px-3 py-1 rounded-full text-xs font-bold flex-shrink-0">
-            ₹{job.wage}
+            ₹{job.minimumWage}
           </span>
         </div>
       </div>
@@ -110,21 +110,16 @@ export default function ApplicationsClient({ job, applications }: Props) {
             {job.description?.substring(0, 120)}
           </p>
           <div className="flex gap-2 flex-wrap">
-            {job.skillsRequired?.map((skill) => (
-              <span
-                key={skill}
-                className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium"
-              >
-                {skill}
-              </span>
-            ))}
+            <span className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium">
+              {job.primarySkill}
+            </span>
           </div>
           <div className="mt-3 text-xs text-gray-500">
             Status:{" "}
             <span
-              className={`font-bold ${job.status === "open" ? "text-green-600" : "text-gray-600"}`}
+              className={`font-bold ${job.isActive ? "text-green-600" : "text-gray-600"}`}
             >
-              {job.status.toUpperCase()}
+              {job.isActive ? "OPEN" : "CLOSED"}
             </span>
           </div>
         </div>
@@ -149,7 +144,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900 text-sm">
-                          Worker: {app.workerId}
+                          Worker: {app.worker?.user.fullName || app.workerId}
                         </p>
                         <p className="text-xs text-gray-500">
                           Applied:{" "}
@@ -166,7 +161,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
                     </span>
                   </div>
 
-                  {job.status === "open" && (
+                  {job.isActive && (
                     <div className="flex gap-3">
                       <Button
                         className="flex-1 bg-green-600 hover:bg-green-700 h-10 text-sm"
@@ -219,7 +214,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
                     </div>
                     <div>
                       <p className="font-medium text-sm text-gray-900">
-                        Worker: {app.workerId}
+                        Worker: {app.worker?.user.fullName || app.workerId}
                       </p>
                       <p className="text-xs text-gray-500">
                         {app.createdAt

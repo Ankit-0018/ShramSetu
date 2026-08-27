@@ -1,75 +1,67 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase/firebase-admin";
-
 
 /*
-create session with cookies for authenticated user
-session contains session token , role and profile_completed
+Create local cookies from backend-issued tokens + user after OTP verify.
+- access_token: short-lived (15min), readable by client JS (client calls
+  the backend directly with it).
+- refresh_token: httpOnly, only used server-side by /api/auth/refresh.
+- user_role / profile_completed: readable, used by proxy.ts for routing.
 */
 export async function POST(req: NextRequest) {
   try {
-    const { token } = await req.json();
+    const { accessToken, refreshToken, user } = await req.json();
 
-    // Verify ID token
-    const decoded = await adminAuth.verifyIdToken(token);
-
-    // Create Firebase session cookie
-    const expiresIn = 60 * 60 * 1000; // 1 hour
-    const sessionCookie = await adminAuth.createSessionCookie(token, {
-      expiresIn,
-    });
+    if (!accessToken || !refreshToken || !user) {
+      return NextResponse.json({ error: "Missing session data" }, { status: 400 });
+    }
 
     const res = NextResponse.json({ success: true });
 
-    // Session cookie
-    res.cookies.set("session", sessionCookie, {
-      httpOnly: true,
+    res.cookies.set("access_token", accessToken, {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60,
+      maxAge: 15 * 60,
     });
 
-    // Role from custom claims
-    const role = decoded.role || "none";
-
-    res.cookies.set("user_role", role, {
+    res.cookies.set("refresh_token", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60,
+      maxAge: 30 * 24 * 60 * 60,
     });
 
-    // Fetch onboarding state from DB
-    const userDoc = await adminDb.collection("users").doc(decoded.uid).get();
-    const profileCompleted = userDoc.data()?.profileCompleted ? "true" : "false";
-
-    res.cookies.set("profile_completed", profileCompleted, {
-      httpOnly: true,
+    res.cookies.set("user_role", user.role ? String(user.role).toLowerCase() : "none", {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60,
+      maxAge: 30 * 24 * 60 * 60,
+    });
+
+    res.cookies.set("profile_completed", user.isProfileCompleted ? "true" : "false", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 30 * 24 * 60 * 60,
     });
 
     return res;
-
   } catch (error) {
     console.error("Session creation failed:", error);
-
-    return NextResponse.json(
-      { error: "AUTH_FAILED" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "AUTH_FAILED" }, { status: 401 });
   }
 }
 
 export async function DELETE() {
   const res = NextResponse.json({ success: true });
 
-  res.cookies.delete("session");
+  res.cookies.delete("access_token");
+  res.cookies.delete("refresh_token");
   res.cookies.delete("user_role");
   res.cookies.delete("profile_completed");
 

@@ -1,10 +1,7 @@
-import AuthProvider from "@/providers/AuthProvider"
-
 export default function ProtectedLayout({
-  children
+  children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-
-  return <><AuthProvider>{children}</AuthProvider></>
+  return <>{children}</>;
 }

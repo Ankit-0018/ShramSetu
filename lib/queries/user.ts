@@ -1,34 +1,22 @@
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase-client";
-import { DATABASE } from "../constants/db";
+import { apiFetch } from "@/lib/api/client";
 import { UserData } from "../stores/useUserStore";
 
-export const getUserProfile = async (uid: string): Promise<UserData | null> => {
-  const snap = await getDoc(doc(db, DATABASE.USERS_COLLECTION, uid));
+export const getUserProfile = async (): Promise<UserData | null> => {
+  try {
+    const { user } = await apiFetch<{ success: boolean; user: any }>(
+      "/api/v1/users/me",
+    );
 
-  if (!snap.exists()) return null;
-
-  const data = snap.data();
-  const worker = data.worker ?? {};
-
-  return {
-    uid: snap.id,
-    fullName: data.name,
-    role: data.role,
-    phone: data.phone ?? null,
-    email: data.email ?? null,
-
-    memberSince: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-
-    averageRating: worker.averageRating ?? null,
-    ratingCount: data.ratingCount ?? 0,
-    completedJobsCount: data.completedJobsCount ?? 0,
-
-    totalEarnings: worker.totalEarnings ?? 0,
-    dailyWage: worker.dailyWage ?? null,
-    skills: worker.skills ?? null,
-    workStatus: worker.status ?? null,
-
-    location: data.location ?? null,
-  };
+    return {
+      id: user.id,
+      phoneNumber: user.phoneNumber,
+      fullName: user.fullName,
+      role: user.role,
+      isProfileCompleted: user.isProfileCompleted,
+      workerProfile: user.workerProfile,
+      employerProfile: user.employerProfile,
+    };
+  } catch {
+    return null;
+  }
 };

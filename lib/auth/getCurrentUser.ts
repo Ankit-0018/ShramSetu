@@ -1,28 +1,24 @@
+import "server-only";
 import { cookies } from "next/headers";
-import { adminAuth, adminDb } from "@/lib/firebase/firebase-admin";
-import { serializeFirestore } from "../utils/firebase/serializeFirestore";
+import { verifyToken, type AccessTokenPayload } from "@/lib/server/jwt";
+import { getCurrentUser as getCurrentUserService } from "@/lib/server/services/user.service";
 
-
+/**
+ * Server-side helper — reads the access_token cookie, verifies it, and
+ * fetches the current user directly (in-process, no HTTP hop). Returns
+ * null if not logged in or the token is invalid/expired.
+ */
 export async function getCurrentUser() {
-  
- /*
- check session and redirect and if session is there get the user document from the db
- */  
+  try {
+    const token = (await cookies()).get("access_token")?.value;
+    if (!token) return null;
 
+    const { payload } = verifyToken<AccessTokenPayload>(token);
+    if (!payload) return null;
 
-
-  const session = (await cookies()).get("session")?.value;
-  if (!session) return null;
-
-  const decoded = await adminAuth.verifySessionCookie(session, true);
-
-  const uid = decoded.uid;
-
-  
-  const doc = await adminDb.collection("users").doc(uid).get();
-  const data = serializeFirestore(doc.data());
-  return {
-    uid,
-    ...doc.data(),
-  };
+    return await getCurrentUserService(payload.userId);
+  } catch (error) {
+    console.error("getCurrentUser failed:", error);
+    return null;
+  }
 }

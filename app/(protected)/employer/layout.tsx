@@ -8,7 +8,7 @@ export default async function EmployerLayout({
 }) {
   return (
     <>
-      <RoleGuard role="employer">{children}</RoleGuard>
+      <RoleGuard role="EMPLOYER">{children}</RoleGuard>
     </>
   );
 }

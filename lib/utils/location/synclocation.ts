@@ -1,34 +1,34 @@
 import { useUserStore } from "@/lib/stores/useUserStore";
+import { apiFetch } from "@/lib/api/client";
 
 export async function syncLocation(coords: { lat: number; lng: number }) {
   const { user, setLocation } = useUserStore.getState();
-  if (!user?.uid) {
+  if (!user?.id) {
     throw new Error("User not available");
   }
-  const res = await fetch("/api/location/reverse-geocode", {
+
+  const resolved = await apiFetch<{
+    success: boolean;
+    data: {
+      latitude: number;
+      longitude: number;
+      cityName: string | null;
+      formattedAddress: string;
+    };
+  }>("/api/v1/locations/resolve", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      uid: user.uid,
-      lat: coords.lat,
-      lng: coords.lng,
-    }),
+    body: { latitude: coords.lat, longitude: coords.lng },
   });
 
-  if (!res.ok) {
-    const err = await res.json();
-    console.error("API Error:", err);
-    throw new Error("Location update failed");
-  }
+  await apiFetch("/api/v1/workers/status", {
+    method: "PATCH",
+    body: { latitude: coords.lat, longitude: coords.lng },
+  });
 
-  const data = await res.json();
   setLocation({
     lat: coords.lat,
     lng: coords.lng,
-    address: data.address,
-    city: data.city,
-    geohash: data.geohash,
+    address: resolved.data.formattedAddress,
+    city: resolved.data.cityName,
   });
 }

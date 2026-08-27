@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
-import { Job } from "@/lib/types";
+import { EmployerJob } from "@/lib/types/job";
 import { deleteJob } from "@/lib/actions/job";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import {
@@ -25,24 +25,23 @@ type Tab = "open" | "closed";
 
 export default function MyJobsClient() {
   const [activeTab, setActiveTab] = useState<Tab>("open");
-  const [jobs,setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<EmployerJob[]>([]);
   const { user } = useUserStore();
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [loading, setLoading] = useState<boolean>(true);
-  const openJobs = jobs.filter((j) => j.status === "open");
-  const closedJobs = jobs.filter((j) => j.status !== "open");
+  const openJobs = jobs.filter((j) => j.isActive);
+  const closedJobs = jobs.filter((j) => !j.isActive);
   const filteredJobs = activeTab === "open" ? openJobs : closedJobs;
 
   const handleDelete = async (jobId: string) => {
-    if (!user?.uid) return;
     if (!confirm("क्या आप इस नौकरी को डिलीट करना चाहते हैं? / Delete this job?"))
       return;
 
     try {
       setDeletingId(jobId);
-      await deleteJob(jobId, user.uid);
+      await deleteJob(jobId);
       startTransition(() => {
         router.refresh();
       });
@@ -54,23 +53,17 @@ export default function MyJobsClient() {
   };
 
   useEffect(() => {
+    if (!user) return;
+    getEmployerJobs(1, 50).then((res) => {
+      setJobs(res.jobs);
+      setLoading(false);
+    });
+  }, [user]);
 
-    if(!user?.uid) return;
-  getEmployerJobs(user.uid).then((res) => {
-    setJobs(res);
-    setLoading(false)
-  });
-  },[user])
+  if (loading) {
+    return <Spinner />;
+  }
 
-
-    if (loading) {
-      return <Spinner />
-    }
-      if (!jobs) {
-      return <div className="p-6">No jobs data found</div>;
-    }
-  
- 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
       {/* Header */}
@@ -122,33 +115,25 @@ export default function MyJobsClient() {
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900">{job.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {job.description?.substring(0, 80)}
-                  </p>
                 </div>
                 <div className="text-right ml-4">
                   <p className="text-lg font-bold text-green-600">
-                    ₹{job.wage}
+                    ₹{job.minimumWage}
                   </p>
-                  <p className="text-xs text-gray-500">{job.duration}</p>
+                  <p className="text-xs text-gray-500">{job.jobType}</p>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-3">
-                {job.skillsRequired?.map((skill) => (
-                  <span
-                    key={skill}
-                    className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium"
-                  >
-                    {skill}
-                  </span>
-                ))}
+                <span className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-medium">
+                  {job.primarySkill}
+                </span>
               </div>
 
               <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
-                  {job.location?.address || "N/A"}
+                  {job.location?.formattedAddress || "N/A"}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
@@ -159,7 +144,7 @@ export default function MyJobsClient() {
               </div>
 
               <div className="flex gap-2">
-                {job.status === "open" && (
+                {job.isActive ? (
                   <>
                     <Link
                       href={`/employer/my-jobs/${job.id}/applications`}
@@ -184,18 +169,9 @@ export default function MyJobsClient() {
                       )}
                     </Button>
                   </>
-                )}
-                {job.status !== "open" && (
-                  <span
-                    className={`text-xs font-bold px-3 py-1 rounded-full ${
-                      job.status === "closed"
-                        ? "bg-gray-100 text-gray-600"
-                        : job.status === "completed"
-                          ? "bg-green-50 text-green-600"
-                          : "bg-red-50 text-red-600"
-                    }`}
-                  >
-                    {job.status.toUpperCase()}
+                ) : (
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-600">
+                    CLOSED
                   </span>
                 )}
               </div>

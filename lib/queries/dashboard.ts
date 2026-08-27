@@ -1,56 +1,36 @@
-import { getJobsWithinRadius, getEmployerJobs } from "./jobs";
-import { getMyApplications, getApplicationsForJob } from "./applications";
+import { getPaginatedJobs, getEmployerJobs } from "./jobs";
+import { getMyApplications, getEmployerApplications } from "./applications";
 import { getMyAssignedJobs, getEmployerAssignments } from "./assignments";
+import type { WorkerDashboardData, EmployerDashboardData } from "../types";
 
 // ─── Worker Dashboard ────────────────────────────────────────────
 
-export async function getWorkerDashboard(
-  workerId: string,
-  lat: number,
-  lng: number,
-  city: string,
-) {
-  const [nearbyJobs, applications, assignments] = await Promise.all([
-    getJobsWithinRadius(lat, lng, city, 3),
-    getMyApplications(workerId),
-    getMyAssignedJobs(workerId),
+export async function getWorkerDashboard(): Promise<WorkerDashboardData> {
+  const [jobsRes, applicationsRes, assignmentsRes] = await Promise.all([
+    getPaginatedJobs(1, 10),
+    getMyApplications(1, 10),
+    getMyAssignedJobs(1, 10),
   ]);
 
+  const nearbyJobs = jobsRes.jobs;
+  const applications = applicationsRes.applications;
+  const assignments = assignmentsRes.assignments;
+
   const closestJob = nearbyJobs.length
-    ? nearbyJobs.reduce((min: any, j: any) => {
-        const minDist =
-          typeof min.distance === "number" ? min.distance : Infinity;
-        const jDist = typeof j.distance === "number" ? j.distance : Infinity;
+    ? nearbyJobs.reduce((min, j) => {
+        const minDist = typeof min.distanceKm === "number" ? min.distanceKm : Infinity;
+        const jDist = typeof j.distanceKm === "number" ? j.distanceKm : Infinity;
         return jDist < minDist ? j : min;
       })
     : null;
 
-  const activeAssignments = assignments.filter(
-    (a: any) => a.status === "active",
-  );
-  const completedAssignments = assignments.filter(
-    (a: any) => a.status === "completed",
-  );
+  const closestJobDistance =
+    closestJob && typeof closestJob.distanceKm === "number"
+      ? `${closestJob.distanceKm.toFixed(1)} km`
+      : "N/A";
 
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  const todayEarnings = completedAssignments
-    .filter((a: any) => {
-      const d = new Date(a.completedAt || a.updatedAt || a.assignedAt || 0);
-      return d >= todayStart;
-    })
-    .reduce((sum: number, a: any) => sum + Number(a.wage || 0), 0);
-
-  // Format closest job distance with proper validation
-  let closestJobDistance = "N/A";
-  if (
-    closestJob &&
-    typeof closestJob.distance === "number" &&
-    closestJob.distance !== undefined
-  ) {
-    closestJobDistance = `${closestJob.distance.toFixed(1)} km`;
-  }
+  const activeAssignments = assignments.filter((a) => a.status === "IN_PROGRESS");
+  const completedAssignments = assignments.filter((a) => a.status === "COMPLETED");
 
   return {
     nearbyJobs,
@@ -60,47 +40,31 @@ export async function getWorkerDashboard(
     assignments,
     activeAssignments,
     completedAssignments,
-    todayEarnings,
+    // TODO: backend doesn't return a wage/earnings amount on assignments today,
+    // so there's no data source for computed earnings here. Left at 0.
+    todayEarnings: 0,
   };
 }
 
 // ─── Employer Dashboard ──────────────────────────────────────────
 
-export async function getEmployerDashboard(employerId: string) {
-  const [jobs, assignments] = await Promise.all([
-    getEmployerJobs(employerId),
-    getEmployerAssignments(employerId),
+export async function getEmployerDashboard(): Promise<EmployerDashboardData> {
+  const [jobsRes, applicationsRes, assignmentsRes] = await Promise.all([
+    getEmployerJobs(1, 50),
+    getEmployerApplications(1, 50),
+    getEmployerAssignments(1, 50),
   ]);
 
-  const activeJobs = jobs.filter((j) => j.status === "open");
-  const closedJobs = jobs.filter((j) => j.status !== "open");
+  const allJobs = jobsRes.jobs;
+  const activeJobs = allJobs.filter((j) => j.isActive);
+  const closedJobs = allJobs.filter((j) => !j.isActive);
 
-  // Gather applications for all active jobs in parallel
-  const applicationsByJob = await Promise.all(
-    activeJobs.map(async (job) => ({
-      jobId: job.id,
-      jobTitle: job.title,
-      applications: await getApplicationsForJob(job.id),
-    })),
-  );
+  const allApplications = applicationsRes.applications;
+  const pendingApplications = allApplications.filter((a) => a.status === "PENDING");
 
-  const allApplications = applicationsByJob.flatMap((b) =>
-    b.applications.map((a: any) => ({ ...a, jobTitle: b.jobTitle })),
-  );
-
-  const pendingApplications = allApplications.filter(
-    (a: any) => a.status === "pending",
-  );
-
-  const activeAssignments = assignments.filter(
-    (a: any) => a.status === "active",
-  );
-  const completedAssignments = assignments.filter(
-    (a: any) => a.status === "completed",
-  );
-  const disputedAssignments = assignments.filter(
-    (a: any) => a.status === "disputed",
-  );
+  const assignments = assignmentsRes.assignments;
+  const activeAssignments = assignments.filter((a) => a.status === "IN_PROGRESS");
+  const completedAssignments = assignments.filter((a) => a.status === "COMPLETED");
 
   return {
     stats: {
@@ -110,13 +74,11 @@ export async function getEmployerDashboard(employerId: string) {
     },
     activeJobs,
     closedJobs,
-    allJobs: jobs,
-    applicationsByJob,
+    allJobs,
     allApplications,
     pendingApplications,
     assignments,
     activeAssignments,
     completedAssignments,
-    disputedAssignments,
   };
 }

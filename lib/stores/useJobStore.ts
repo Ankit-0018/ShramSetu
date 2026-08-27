@@ -1,19 +1,14 @@
 import { create } from "zustand";
-import { Job } from "../types";
+import { NearbyJob } from "../types/job";
 import { getPaginatedJobs } from "../queries/jobs";
-import { JobFilters } from "../types/job";
 
 interface JobState {
-  jobs: Job[];
+  jobs: NearbyJob[];
   loading: boolean;
   loadingMore: boolean;
   hasMore: boolean;
-  lastVisibleId: string | null;
+  page: number;
   error: string | null;
-
-  filters: JobFilters;
-
-  setFilters: (filters: Partial<JobFilters>) => void;
 
   fetchJobs: (limit?: number) => Promise<void>;
   fetchMoreJobs: (limit?: number) => Promise<void>;
@@ -25,29 +20,16 @@ export const useJobStore = create<JobState>()((set, get) => ({
   loading: false,
   loadingMore: false,
   hasMore: true,
-  lastVisibleId: null,
+  page: 1,
   error: null,
 
-  filters: {},
-  setFilters: (newFilters) =>
-    set((state) => ({
-      filters: { ...state.filters, ...newFilters },
-      jobs: [],
-      lastVisibleId: null,
-      hasMore: true,
-    })),
-
-  fetchJobs: async (limitSize = 10) => {
-    console.log("inside fetching jobs..");
-
-    const { filters } = get();
+  fetchJobs: async (limit = 10) => {
     set({ loading: true, error: null });
     try {
-      const response = await getPaginatedJobs(limitSize, undefined, filters);
-      console.log("This is the response...", response);
+      const response = await getPaginatedJobs(1, limit);
       set({
         jobs: response.jobs,
-        lastVisibleId: response.lastVisibleId,
+        page: 1,
         hasMore: response.hasMore,
         loading: false,
       });
@@ -55,20 +37,17 @@ export const useJobStore = create<JobState>()((set, get) => ({
       set({ error: "Failed to fetch jobs", loading: false });
     }
   },
-  fetchMoreJobs: async (limitSize = 10) => {
-    const { hasMore, lastVisibleId, loadingMore, jobs, filters } = get();
-    if (!hasMore || !lastVisibleId || loadingMore) return;
+  fetchMoreJobs: async (limit = 10) => {
+    const { hasMore, loadingMore, jobs, page } = get();
+    if (!hasMore || loadingMore) return;
 
     set({ loadingMore: true });
     try {
-      const response = await getPaginatedJobs(
-        limitSize,
-        lastVisibleId,
-        filters,
-      );
+      const nextPage = page + 1;
+      const response = await getPaginatedJobs(nextPage, limit);
       set({
         jobs: [...jobs, ...response.jobs],
-        lastVisibleId: response.lastVisibleId,
+        page: nextPage,
         hasMore: response.hasMore,
         loadingMore: false,
       });
@@ -83,7 +62,7 @@ export const useJobStore = create<JobState>()((set, get) => ({
       loading: false,
       loadingMore: false,
       hasMore: true,
-      lastVisibleId: null,
+      page: 1,
       error: null,
     });
   },

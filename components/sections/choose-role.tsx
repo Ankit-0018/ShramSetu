@@ -74,8 +74,6 @@ const ChooseRole = ({
           {loading ? "Please wait..." : "Continue"}
           </button>
         </div>
-
-        <div id="recaptcha-container" className="mt-4"></div>
       </div>
     </div>
   );

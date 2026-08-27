@@ -1,14 +1,9 @@
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase-client";
-import { DATABASE } from "../constants/db";
+import { apiFetch } from "@/lib/api/client";
 
-export const getEmployerProfile = async (employerId: string) => {
-  const snap = await getDoc(doc(db, DATABASE.USERS_COLLECTION, employerId));
+export const getEmployerProfile = async (userId: string) => {
+  const res = await apiFetch<{ success: boolean; user: any }>(
+    `/api/v1/users/${userId}`,
+  );
 
-  if (!snap.exists()) throw new Error("Employer not found");
-
-  return {
-    id: snap.id,
-    ...snap.data(),
-  };
+  return res.user;
 };

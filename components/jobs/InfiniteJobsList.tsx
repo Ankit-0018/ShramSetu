@@ -17,7 +17,6 @@ export function InfiniteJobsList({ searchQuery }: InfiniteJobsListProps) {
     hasMore,
     fetchJobs,
     fetchMoreJobs,
-    filters,
   } = useJobStore();
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -43,7 +42,13 @@ export function InfiniteJobsList({ searchQuery }: InfiniteJobsListProps) {
 
   useEffect(() => {
     fetchJobs();
-  }, [filters]);
+  }, []);
+
+  const filteredJobs = searchQuery
+    ? jobs.filter((job) =>
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : jobs;
 
   if (loading && jobs.length === 0) {
     return (
@@ -53,7 +58,7 @@ export function InfiniteJobsList({ searchQuery }: InfiniteJobsListProps) {
     );
   }
 
-  if (jobs.length === 0 && !loading) {
+  if (filteredJobs.length === 0 && !loading) {
     return (
       <div className="empty-state">
         <div className="empty-state-icon">🔍</div>
@@ -68,11 +73,11 @@ export function InfiniteJobsList({ searchQuery }: InfiniteJobsListProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600 mb-2">
-        {jobs.length} मिला / Found {jobs.length} jobs
+        {filteredJobs.length} मिला / Found {filteredJobs.length} jobs
       </p>
 
-      {jobs.map((job, index) => {
-        if (jobs.length === index + 1) {
+      {filteredJobs.map((job, index) => {
+        if (filteredJobs.length === index + 1) {
           return (
             <div ref={lastJobElementRef} key={job.id}>
               <JobCard job={job} />
@@ -88,7 +93,7 @@ export function InfiniteJobsList({ searchQuery }: InfiniteJobsListProps) {
         </div>
       )}
 
-      {!hasMore && jobs.length > 0 && (
+      {!hasMore && filteredJobs.length > 0 && (
         <p className="text-center text-xs text-gray-400 py-4">
           No more jobs to show / और काम नहीं हैं
         </p>

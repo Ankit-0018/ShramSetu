@@ -1,93 +1,29 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebase/firebase-client";
-import { DATABASE } from "../constants/db";
-
-function formatAssignments(snapshot: any) {
-  return snapshot.docs.map((doc: any) => {
-    const data = doc.data();
-
-    // Serialize any possible Firestore Timestamp
-    return {
-      id: doc.id,
-      ...data,
-      createdAt:
-        data.createdAt?.toDate?.()?.toISOString() || data.createdAt || null,
-      updatedAt:
-        data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt || null,
-      assignedAt:
-        data.assignedAt?.toDate?.()?.toISOString() || data.assignedAt || null,
-      completedAt:
-        data.completedAt?.toDate?.()?.toISOString() || data.completedAt || null,
-      disputedAt:
-        data.disputedAt?.toDate?.()?.toISOString() || data.disputedAt || null,
-    };
-  });
-}
-
-function sortAssignments(assignments: any[]) {
-  return assignments.sort((a, b) => {
-    const dateA = a.assignedAt ? new Date(a.assignedAt).getTime() : 0;
-    const dateB = b.assignedAt ? new Date(b.assignedAt).getTime() : 0;
-    return dateB - dateA;
-  });
-}
+import { apiFetch } from "@/lib/api/client";
+import { Assignment, Pagination } from "../types/job";
 
 /**
- * Get all employer assignments
+ * Get all assignments across the current employer's jobs
  */
-export const getEmployerAssignments = async (employerId: string) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_ASSIGNMENTS_COLLECTION),
-    where("employerId", "==", employerId),
-  );
-
-  const snap = await getDocs(q);
-  return sortAssignments(formatAssignments(snap));
-};
-
-/**
- * Get employer assignments filtered by status
- */
-export const getEmployerAssignmentsByStatus = async (
-  employerId: string,
-  status: "pending" | "completed" | "disputed",
+export const getEmployerAssignments = async (
+  page: number = 1,
+  limit: number = 10,
 ) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_ASSIGNMENTS_COLLECTION),
-    where("employerId", "==", employerId),
-    where("status", "==", status),
-  );
+  const res = await apiFetch<{
+    success: boolean;
+    data: { assignments: Assignment[]; pagination: Pagination };
+  }>(`/api/v1/employers/assignments?page=${page}&limit=${limit}`);
 
-  const snap = await getDocs(q);
-  return sortAssignments(formatAssignments(snap));
+  return res.data;
 };
 
 /**
- * Get worker assigned jobs
+ * Get all assignments for the current worker
  */
-export const getMyAssignedJobs = async (workerId: string) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_ASSIGNMENTS_COLLECTION),
-    where("workerId", "==", workerId),
-  );
+export const getMyAssignedJobs = async (page: number = 1, limit: number = 10) => {
+  const res = await apiFetch<{
+    success: boolean;
+    data: { assignments: Assignment[]; pagination: Pagination };
+  }>(`/api/v1/workers/assignments?page=${page}&limit=${limit}`);
 
-  const snap = await getDocs(q);
-  return sortAssignments(formatAssignments(snap));
-};
-
-/**
- * Get worker assigned jobs filtered by status
- */
-export const getMyAssignedJobsByStatus = async (
-  workerId: string,
-  status: "pending" | "completed" | "disputed",
-) => {
-  const q = query(
-    collection(db, DATABASE.JOBS_ASSIGNMENTS_COLLECTION),
-    where("workerId", "==", workerId),
-    where("status", "==", status),
-  );
-
-  const snap = await getDocs(q);
-  return sortAssignments(formatAssignments(snap));
+  return res.data;
 };
