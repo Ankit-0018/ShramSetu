@@ -72,9 +72,10 @@ export function useAuthActions(mode: AuthMode) {
 
       return { success: true };
     } catch (error) {
-      console.error("OTP send error:", error);
       const message =
-        error instanceof ApiError ? error.message : "Failed to send OTP";
+        error instanceof ApiError
+          ? error.message
+          : "Could not reach the server. Please try again.";
       setFormError((prev) => ({ ...prev, mobileErr: message }));
       return { success: false, error: message };
     } finally {
