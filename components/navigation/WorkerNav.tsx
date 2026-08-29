@@ -13,37 +13,7 @@ const navItems = [
   { labelKey: "Profile", href: "/worker/profile", icon: User },
 ];
 
-/** Horizontal nav links shown inline in the header on tablet/desktop. */
-export function WorkerNavLinks() {
-  const pathname = usePathname();
-  const { t } = useLanguage();
-  const isActive = (path: string) => pathname === path;
-
-  return (
-    <div className="hidden md:flex md:items-center md:gap-1">
-      {navItems.map((item) => {
-        const Icon = item.icon;
-        const active = isActive(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
-              active
-                ? "bg-success-muted text-primary"
-                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-            }`}
-          >
-            <Icon className="size-4" strokeWidth={active ? 2.5 : 2} />
-            {t(item.labelKey)}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Fixed bottom tab bar — mobile/tablet only, hidden on desktop where WorkerNavLinks takes over. */
+/** Fixed bottom tab bar — the single navigation surface at every breakpoint. */
 export function WorkerNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
@@ -51,7 +21,7 @@ export function WorkerNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="bottom-nav md:hidden">
+    <nav className="bottom-nav">
       <div className="bottom-nav-content">
         {navItems.map((item) => {
           const Icon = item.icon;

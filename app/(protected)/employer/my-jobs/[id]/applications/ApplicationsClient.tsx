@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
+import "@/styles/worker.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JobDetail, Application } from "@/lib/types/job";
@@ -84,27 +85,27 @@ export default function ApplicationsClient({ job, applications }: Props) {
   const processedApps = applications.filter((a) => a.status !== "PENDING");
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-background border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/employer/my-jobs">
-            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
-          </Link>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate text-foreground">
-              Applications
-            </h1>
-            <p className="text-sm text-muted-foreground truncate">{job.title}</p>
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <Link href="/employer/my-jobs" className="shrink-0">
+              <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base font-bold truncate text-foreground">
+                Applications
+              </h1>
+              <p className="text-xs text-muted-foreground truncate">{job.title}</p>
+            </div>
+            <Badge variant="success" className="flex-shrink-0">
+              ₹{job.minimumWage}
+            </Badge>
           </div>
-          <EmployerNavLinks />
-          <Badge variant="success" className="flex-shrink-0">
-            ₹{job.minimumWage}
-          </Badge>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <div className="px-4 py-6 pb-32 space-y-6">
         {/* Job Summary */}
         <div className="bg-card rounded-2xl p-5 border border-border">
           <h3 className="font-bold text-foreground mb-2">{job.title}</h3>
@@ -131,7 +132,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
               <Clock className="w-5 h-5 text-warning" />
               Pending ({pendingApps.length})
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {pendingApps.map((app) => (
                 <div
                   key={app.id}
@@ -200,7 +201,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
             <h3 className="text-lg font-bold text-foreground mb-4">
               Processed
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {processedApps.map((app) => (
                 <div
                   key={app.id}
@@ -244,6 +245,7 @@ export default function ApplicationsClient({ job, applications }: Props) {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       <EmployerNav />

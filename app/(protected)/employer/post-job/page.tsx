@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
 import LocationField from "@/components/sections/location-field";
 import { createJob } from "@/lib/actions/job";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { JobType } from "@/lib/types/job";
+import "@/styles/worker.css";
 
 const SKILLS = [
   { id: "labour", label: "Labour / लेबर" },
@@ -88,28 +89,28 @@ export default function PostJobPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/employer/home">
-            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground">
-              Post a new job
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              नई नौकरी पोस्ट करें
-            </p>
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <Link href="/employer/home" className="shrink-0">
+              <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-foreground truncate">
+                Post a new job
+              </h1>
+              <p className="text-xs text-muted-foreground truncate">
+                नई नौकरी पोस्ट करें
+              </p>
+            </div>
           </div>
-          <EmployerNavLinks />
         </div>
-      </div>
 
-      {/* Form */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <form onSubmit={handleSubmit} className="space-y-8 lg:max-w-2xl lg:mx-auto">
+        {/* Form */}
+        <div className="px-4 py-6 pb-32">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Job Title */}
           <div>
             <label className="block font-semibold text-foreground mb-2">
@@ -129,7 +130,7 @@ export default function PostJobPage() {
             <p className="font-semibold text-foreground mb-3">
               Skill needed / आवश्यक कौशल *
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {SKILLS.map((s) => (
                 <button
                   key={s.id}
@@ -228,6 +229,7 @@ export default function PostJobPage() {
             </Button>
           </Link>
         </form>
+        </div>
       </div>
 
       <EmployerNav />

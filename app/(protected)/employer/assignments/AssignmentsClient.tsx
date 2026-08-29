@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
 import { PillTabs } from "@/components/ui/pill-tabs";
 import { Assignment } from "@/lib/types/job";
@@ -18,6 +18,7 @@ import {
 import { getEmployerAssignments } from "@/lib/queries/assignments";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import Spinner from "@/components/_shared/spinner";
+import "@/styles/worker.css";
 
 type Tab = "active" | "completed" | "cancelled";
 
@@ -99,35 +100,34 @@ export default function AssignmentsClient() {
       .join("");
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/employer/home">
-            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
-          </Link>
-          <h1 className="flex-1 text-xl font-bold text-foreground">Active work</h1>
-          <EmployerNavLinks />
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <Link href="/employer/home" className="shrink-0">
+              <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
+            </Link>
+            <h1 className="flex-1 text-lg font-bold text-foreground truncate">Active work</h1>
+          </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="max-w-6xl mx-auto px-4 pt-4">
-        <PillTabs
-          className="mb-6"
-          items={[
-            { key: "active", label: "Active", count: active.length },
-            { key: "completed", label: "Done", count: completed.length },
-            { key: "cancelled", label: "Cancelled", count: cancelled.length },
-          ]}
-          active={activeTab}
-          onChange={(key) => setActiveTab(key as Tab)}
-        />
-      </div>
+        {/* Tabs */}
+        <div className="px-4 pt-4 sticky top-14 bg-background z-30 border-b border-border pb-4">
+          <PillTabs
+            items={[
+              { key: "active", label: "Active", count: active.length },
+              { key: "completed", label: "Done", count: completed.length },
+              { key: "cancelled", label: "Cancelled", count: cancelled.length },
+            ]}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as Tab)}
+          />
+        </div>
 
-      <div className="max-w-6xl mx-auto px-4">
+        <div className="px-4 py-4 pb-32">
         {filteredAssignments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
           {filteredAssignments.map((assign) => (
             <div
               key={assign.id}
@@ -212,6 +212,7 @@ export default function AssignmentsClient() {
             </p>
           </div>
         )}
+        </div>
       </div>
 
       <EmployerNav />

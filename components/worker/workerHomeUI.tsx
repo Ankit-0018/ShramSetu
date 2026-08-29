@@ -44,10 +44,9 @@ export default function WorkerHomeUI({
           </button>
         </div>
 
-        {/* Main Content */}
-        <div className="px-4 py-5 pb-32 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
-          {/* Main column: status + quick stats */}
-          <div className="space-y-6 lg:col-span-2">
+        {/* Main Content — single stacked column at every breakpoint */}
+        <div className="px-4 py-5 pb-32">
+          <div className="space-y-6">
             <WorkerStatus
               workStatus={workStatus}
               onStatusChange={onStatusChange}
@@ -55,18 +54,17 @@ export default function WorkerHomeUI({
             <QuickStats workStatus={workStatus} data={data} />
           </div>
 
-          {/* Sidebar column: location sharing, profile, verification */}
-          <div className="space-y-6 mt-6 lg:mt-0 lg:col-span-1">
+          <div className="space-y-6 mt-6">
             <ShareLocation />
             <WorkerProfile />
 
             {/* Verification Banner */}
             <div className="bg-accent rounded-2xl p-4 flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-accent-foreground shrink-0" />
-              <p className="flex-1 text-xs font-medium text-accent-foreground">
+              <p className="min-w-0 flex-1 text-xs font-medium leading-relaxed text-accent-foreground">
                 Add Aadhaar — verified workers get more jobs
               </p>
-              <button className="flex items-center gap-0.5 text-sm font-semibold text-primary shrink-0">
+              <button className="flex items-center gap-0.5 whitespace-nowrap text-sm font-semibold text-primary shrink-0">
                 Add
                 <ChevronRight className="w-4 h-4" />
               </button>

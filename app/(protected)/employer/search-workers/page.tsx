@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ShieldCheck, Star } from "lucide-react";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
+import "@/styles/worker.css";
 
 // NOTE: No worker-search query/action exists anywhere in lib/queries or
 // lib/actions yet (verified via codebase search). This is a static visual
@@ -61,51 +62,52 @@ export default function SearchWorkersPage() {
       .join("");
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white pt-4">
-        <div className="max-w-6xl mx-auto px-4 pb-4 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-bold text-foreground">Find workers</h1>
-          <EmployerNavLinks />
-        </div>
-      </div>
-
-      {/* Search + Filter */}
-      <div className="max-w-6xl mx-auto px-4 space-y-3">
-        <div className="relative md:max-w-md">
-          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Name or skill"
-            className="pl-10"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <h1 className="text-lg font-bold text-foreground">Find workers</h1>
+          </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(filter === f ? null : f)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-                filter === f
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-muted-foreground"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
+        {/* Search + Filter */}
+        <div className="px-4 py-3 space-y-3 bg-card border-b border-border sticky top-14 z-30">
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Name or skill"
+              className="pl-10"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(filter === f ? null : f)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                  filter === f
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Count */}
-      <div className="max-w-6xl mx-auto px-4 pt-4 pb-2 text-sm text-gray-500">
-        {workers.length} workers found
-      </div>
+        <div className="px-4 pb-32">
+        {/* Count */}
+        <p className="pt-4 pb-2 text-sm text-gray-500">
+          {workers.length} workers found
+        </p>
 
-      {/* Worker Cards */}
-      <div className="max-w-6xl mx-auto px-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {/* Worker Cards */}
+        <div className="grid gap-4">
         {workers.map((w) => (
           <div
             key={w.id}
@@ -155,6 +157,8 @@ export default function SearchWorkersPage() {
             </div>
           </div>
         ))}
+        </div>
+        </div>
       </div>
 
       <EmployerNav />

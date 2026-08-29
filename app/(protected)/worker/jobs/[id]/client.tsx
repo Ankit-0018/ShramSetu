@@ -102,12 +102,12 @@ export default function JobDetailsPage() {
           </button>
         </div>
 
-        <div className="px-4 pb-32 lg:pb-12 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+        <div className="px-4 pb-32">
           {/* Main column */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-6">
             {/* Job Image */}
             <div className="rounded-2xl overflow-hidden border border-border">
-              <div className="relative h-48 lg:h-72 w-full bg-secondary">
+              <div className="relative h-48 w-full bg-secondary">
                 {job.imageUrls?.[0] ? (
                   <Image
                     src={job.imageUrls[0]}
@@ -203,8 +203,8 @@ export default function JobDetailsPage() {
             </div>
           </div>
 
-          {/* Sidebar: employer + apply CTA */}
-          <div className="mt-6 lg:mt-0 lg:col-span-1 lg:sticky lg:top-20 space-y-4">
+          {/* Employer card */}
+          <div className="mt-6 space-y-4">
             {/* Employer */}
             <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-primary flex-shrink-0 flex items-center justify-center font-bold text-primary-foreground text-lg">
@@ -228,32 +228,12 @@ export default function JobDetailsPage() {
               </Button>
             </div>
 
-            {/* Action Button - in-flow sidebar version, lg+ only */}
-            {job.isActive && (
-              <div className="hidden lg:block rounded-2xl border border-border bg-card p-4">
-                <Button
-                  onClick={handleApply}
-                  disabled={isApplying}
-                  size="xl"
-                  className="w-full shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70"
-                >
-                  {isApplying ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  )}
-                  <span className="text-lg font-bold">
-                    {isApplying ? "Applying..." : "Apply Now"}
-                  </span>
-                </Button>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Action Button - fixed bottom bar, mobile/below-lg only */}
+        {/* Action Button - fixed bottom bar */}
         {job.isActive && (
-          <div className="fixed bottom-24 left-0 right-0 px-4 max-w-[28rem] mx-auto z-40 lg:hidden">
+          <div className="fixed bottom-24 left-0 right-0 px-4 max-w-[30rem] mx-auto z-40">
             <Button
               onClick={handleApply}
               disabled={isApplying}

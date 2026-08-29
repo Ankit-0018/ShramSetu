@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
+import { WorkerHeader } from "@/components/worker/worker-header";
 import "@/styles/worker.css";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { getMyAssignedJobs } from "@/lib/queries/assignments";
@@ -64,8 +65,10 @@ export default function WorkerEarningsPage() {
   return (
     <div className="worker-container">
       <div className="worker-layout">
+        <WorkerHeader title="My Earnings" />
+
         {/* Scroll Content */}
-        <div className="px-4 py-6 space-y-6">
+        <div className="px-4 py-6 pb-32 space-y-6">
           {/* Header */}
           <div>
             <h1 className="text-2xl font-bold text-foreground">My earnings</h1>
@@ -75,7 +78,7 @@ export default function WorkerEarningsPage() {
           </div>
 
           {/* Stats Row */}
-          <div className="max-w-2xl mx-auto grid grid-cols-3 divide-x divide-border border-y border-border py-4">
+          <div className="grid grid-cols-3 divide-x divide-border border-y border-border py-4">
             <div className="text-center">
               <p className="text-xl font-bold text-foreground">
                 {pendingAssignments.length}
@@ -100,7 +103,7 @@ export default function WorkerEarningsPage() {
           <div>
             <h3 className="font-bold text-foreground mb-2">Work log</h3>
             {assignments.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {assignments.slice(0, 10).map((assign) => (
                   <div
                     key={assign.id}

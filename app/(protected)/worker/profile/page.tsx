@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
+import { WorkerHeader } from "@/components/worker/worker-header";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import "@/styles/worker.css";
 import {
@@ -53,17 +54,12 @@ export default function WorkerProfilePage() {
     <div className="worker-container">
       <div className="worker-layout">
         {/* Header */}
-        <div className="worker-header">
-          <div className="worker-header-content">
-            <h1 className="worker-header-title">Profile</h1>
-          </div>
-        </div>
+        <WorkerHeader title="Profile" />
 
-        <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:px-4 lg:pt-4">
-          {/* Left column: avatar/name/stats + logout at lg+ */}
-          <div className="lg:col-span-1">
+        <div>
+          <div>
             {/* Profile Header */}
-            <div className="profile-header lg:rounded-2xl lg:border lg:border-border lg:bg-card lg:px-4">
+            <div className="profile-header">
               <div className="profile-avatar">
                 <span className="text-2xl">👨‍🔧</span>
                 <button className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1.5 border-2 border-primary-foreground">
@@ -73,26 +69,11 @@ export default function WorkerProfilePage() {
               <h2 className="profile-name">{user.fullName}</h2>
               <p className="profile-skill">{workerProfile?.skills?.join(", ")}</p>
             </div>
-
-            {/* Actions (logout) - lives in left column at lg+ */}
-            <div className="hidden lg:block px-0 py-4 space-y-3">
-              <Button
-                variant="outline"
-                size="xl"
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className="w-full border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                {loggingOut ? "Logging out..." : "Log out"}
-              </Button>
-            </div>
           </div>
 
-          {/* Right column: Jobs + Contact cards at lg+ */}
-          <div className="lg:col-span-2">
+          <div>
             {/* Profile Info */}
-            <div className="profile-info lg:p-0 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+            <div className="profile-info">
               {/* Jobs */}
               <div className="rounded-2xl border border-border bg-card overflow-hidden">
                 <h3 className="px-4 pt-4 pb-2 text-sm font-semibold text-muted-foreground">
@@ -164,8 +145,8 @@ export default function WorkerProfilePage() {
           </div>
         </div>
 
-        {/* Actions (logout) - mobile/below-lg only, stacked at bottom */}
-        <div className="px-4 py-4 space-y-3 pb-32 lg:hidden">
+        {/* Actions (logout) - stacked at bottom */}
+        <div className="px-4 py-4 space-y-3 pb-32">
           <Button
             variant="outline"
             size="xl"
@@ -177,7 +158,6 @@ export default function WorkerProfilePage() {
             {loggingOut ? "Logging out..." : "Log out"}
           </Button>
         </div>
-        <div className="hidden lg:block pb-12" />
       </div>
 
       {/* Bottom Navigation */}

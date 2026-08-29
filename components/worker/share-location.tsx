@@ -11,19 +11,19 @@ const ShareLocation = () => {
   return (
     <>
       <div className="bg-white rounded-2xl p-4 border border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             {isTracking ? (
-              <MapPin className="w-5 h-5 text-primary" />
+              <MapPin className="w-5 h-5 text-primary shrink-0" />
             ) : (
-              <MapPinOff className="w-5 h-5 text-muted-foreground" />
+              <MapPinOff className="w-5 h-5 text-muted-foreground shrink-0" />
             )}
 
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground">
                 Share Your Location
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground truncate">
                 {isTracking ? "On - Jobs visible within 3 km" : "Off"}
               </p>
             </div>
@@ -31,7 +31,7 @@ const ShareLocation = () => {
 
           <button
             onClick={isTracking ? stopTracking : startTracking}
-            className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+            className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors ${
               isTracking ? "bg-primary" : "bg-secondary"
             }`}
           >

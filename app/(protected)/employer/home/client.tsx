@@ -2,7 +2,7 @@
 
 import { Plus, Users, Briefcase, ClipboardList, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { LanguageToggle } from "@/components/_shared/language-toggle";
 import { Badge } from "@/components/ui/badge";
 import { EmployerDashboardData } from "@/lib/types";
@@ -13,6 +13,7 @@ import { getEmployerDashboard } from "@/lib/queries/dashboard";
 import Spinner from "@/components/_shared/spinner";
 import Image from "next/image";
 import Logo from "@/public/logo-icon.png"
+import "@/styles/worker.css";
 
 function timeAgo(dateString: string) {
   const diffMs = Date.now() - new Date(dateString).getTime();
@@ -57,34 +58,33 @@ export default function EmployerHomeUI() {
 
   const { stats, activeJobs, pendingApplications, activeAssignments } = data;
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
-            <Image
-              src={Logo}
-              alt="ApnaKaam"
-              width={40}
-              height={40}
-              priority
-              className="rounded-xl"
-            />
-            <div>
-              <p className="font-bold leading-tight">{user?.fullName || "Employer"}</p>
-              <p className="text-xs text-muted-foreground">Employer</p>
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <div className="flex items-center gap-3 min-w-0">
+              <Image
+                src={Logo}
+                alt="ApnaKaam"
+                width={36}
+                height={36}
+                priority
+                className="rounded-xl shrink-0"
+              />
+              <div className="min-w-0">
+                <p className="font-bold leading-tight truncate">{user?.fullName || "Employer"}</p>
+                <p className="text-xs text-muted-foreground">Employer</p>
+              </div>
+            </div>
+
+            <div className="worker-header-actions shrink-0">
+              <LanguageToggle />
             </div>
           </div>
-
-          <EmployerNavLinks />
-
-          <LanguageToggle />
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
-        {/* Main column: stats + post job + actions + live jobs */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="px-4 py-5 pb-32 space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-white py-4">
             <Stat value={stats.activeJobsCount} label="Live jobs" />
@@ -95,14 +95,14 @@ export default function EmployerHomeUI() {
           {/* Post a new job */}
           <Link
             href="/employer/post-job"
-            className="flex items-center justify-center gap-2 w-full h-14 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition lg:hidden"
+            className="flex items-center justify-center gap-2 w-full h-14 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition"
           >
             <Plus className="w-5 h-5" />
             Post a new job
           </Link>
 
           {/* Actions */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Link href="/employer/post-job">
               <ActionCard
                 icon={<Plus className="w-5 h-5" />}
@@ -139,59 +139,6 @@ export default function EmployerHomeUI() {
               />
             </Link>
           </div>
-
-          {/* Live Jobs */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold">Live jobs</h3>
-              <Link
-                href="/employer/my-jobs"
-                className="text-sm text-primary font-semibold"
-              >
-                See all
-              </Link>
-            </div>
-
-            {activeJobs.length > 0 ? (
-              <div className="rounded-2xl border border-border bg-white divide-y divide-border overflow-hidden">
-                {activeJobs.slice(0, 5).map((job: EmployerJob) => (
-                  <Link
-                    key={job.id}
-                    href={`/employer/my-jobs/${job.id}/applications`}
-                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-secondary/50 transition"
-                  >
-                    <div className="min-w-0">
-                      <h4 className="font-bold truncate">{job.title}</h4>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {job.location.formattedAddress || job.primarySkill} · {timeAgo(job.createdAt)}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-bold text-primary">₹{job.minimumWage}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-border bg-white">
-                <p className="text-muted-foreground text-sm text-center py-8">
-                  No active jobs
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Side column: post job button (lg+) + new applicants + active assignments */}
-        <div className="space-y-6 lg:col-span-1">
-          {/* Post a new job (lg+ only, lives at top of side column) */}
-          <Link
-            href="/employer/post-job"
-            className="hidden lg:flex items-center justify-center gap-2 w-full h-14 rounded-full bg-primary text-primary-foreground font-semibold text-base hover:bg-primary/90 transition"
-          >
-            <Plus className="w-5 h-5" />
-            Post a new job
-          </Link>
 
           {/* New Applicants */}
           {pendingApplications.length > 0 && (
@@ -260,6 +207,47 @@ export default function EmployerHomeUI() {
               </div>
             </div>
           )}
+
+          {/* Live Jobs */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-bold">Live jobs</h3>
+              <Link
+                href="/employer/my-jobs"
+                className="text-sm text-primary font-semibold"
+              >
+                See all
+              </Link>
+            </div>
+
+            {activeJobs.length > 0 ? (
+              <div className="rounded-2xl border border-border bg-white divide-y divide-border overflow-hidden">
+                {activeJobs.slice(0, 5).map((job: EmployerJob) => (
+                  <Link
+                    key={job.id}
+                    href={`/employer/my-jobs/${job.id}/applications`}
+                    className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-secondary/50 transition"
+                  >
+                    <div className="min-w-0">
+                      <h4 className="font-bold truncate">{job.title}</h4>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {job.location.formattedAddress || job.primarySkill} · {timeAgo(job.createdAt)}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-primary">₹{job.minimumWage}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-border bg-white">
+                <p className="text-muted-foreground text-sm text-center py-8">
+                  No active jobs
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

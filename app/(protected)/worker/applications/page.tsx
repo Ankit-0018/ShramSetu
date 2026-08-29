@@ -95,7 +95,7 @@ export default function MyApplicationsPage() {
             </div>
           ) : activeTab === "applications" ? (
             applications.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {applications.map((app) => (
                   <Link
                     href={`/worker/jobs/${app.jobId}`}
@@ -133,7 +133,7 @@ export default function MyApplicationsPage() {
               />
             )
           ) : assignments.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {assignments.map((assign) => (
                 <div
                   key={assign.id}

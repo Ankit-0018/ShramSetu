@@ -12,27 +12,24 @@
   }
 }
 
+/* Single centred reading column. Mobile is the primary target, so the
+   column stays phone-width and simply gains white space on either side
+   as the viewport grows. */
 .worker-layout {
   max-width: 100%;
   margin: 0 auto;
   width: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .worker-layout {
-    max-width: 48rem;
+    max-width: 30rem;
   }
 }
 
 @media (min-width: 1024px) {
   .worker-layout {
-    max-width: 64rem;
-  }
-}
-
-@media (min-width: 1280px) {
-  .worker-layout {
-    max-width: 80rem;
+    max-width: 34rem;
   }
 }
 
@@ -44,13 +41,21 @@
   top: 0;
   z-index: 40;
   border-bottom: 1px solid var(--border);
+  /* Break out of .worker-layout so the bar spans the full viewport
+     while its inner content stays aligned with the page column. */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
 }
 
 .worker-header-content {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
 }
 
 .worker-header-title {
@@ -252,7 +257,7 @@
 }
 
 .bottom-nav-content {
-  max-width: 28rem;
+  max-width: 30rem;
   margin: 0 auto;
   width: 100%;
   display: flex;
@@ -260,18 +265,6 @@
   justify-content: space-around;
   padding: 0.5rem 0.75rem;
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-}
-
-@media (min-width: 768px) {
-  .bottom-nav-content {
-    max-width: 40rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .bottom-nav-content {
-    max-width: 48rem;
-  }
 }
 
 .bottom-nav-item {

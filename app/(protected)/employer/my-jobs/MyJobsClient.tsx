@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
+import { EmployerNav } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PillTabs } from "@/components/ui/pill-tabs";
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { getEmployerJobs } from "@/lib/queries/jobs";
 import Spinner from "@/components/_shared/spinner";
+import "@/styles/worker.css";
 
 type Tab = "open" | "closed";
 
@@ -65,37 +66,36 @@ export default function MyJobsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/employer/home">
-            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
-          </Link>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground">My jobs</h1>
-            <p className="text-sm text-muted-foreground">मेरी नौकरियाँ</p>
+    <div className="worker-container">
+      <div className="worker-layout">
+        {/* Header */}
+        <div className="worker-header">
+          <div className="worker-header-content">
+            <Link href="/employer/home" className="shrink-0">
+              <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-foreground truncate">My jobs</h1>
+              <p className="text-xs text-muted-foreground truncate">मेरी नौकरियाँ</p>
+            </div>
           </div>
-          <EmployerNavLinks />
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="max-w-6xl mx-auto px-4 pt-4">
-        <PillTabs
-          items={[
-            { key: "open", label: "Open", count: openJobs.length },
-            { key: "closed", label: "Closed", count: closedJobs.length },
-          ]}
-          active={activeTab}
-          onChange={(key) => setActiveTab(key as Tab)}
-          className="mb-6"
-        />
-      </div>
+        {/* Tabs */}
+        <div className="px-4 pt-4 sticky top-14 bg-background z-30 border-b border-border pb-4">
+          <PillTabs
+            items={[
+              { key: "open", label: "Open", count: openJobs.length },
+              { key: "closed", label: "Closed", count: closedJobs.length },
+            ]}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as Tab)}
+          />
+        </div>
 
-      <div className="max-w-6xl mx-auto px-4">
+        <div className="px-4 py-4 pb-32">
         {filteredJobs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
           {filteredJobs.map((job) => (
             <div
               key={job.id}
@@ -174,6 +174,7 @@ export default function MyJobsClient() {
             )}
           </div>
         )}
+        </div>
       </div>
 
       <EmployerNav />
