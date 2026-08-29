@@ -6,28 +6,28 @@ export default function WorkerProfile() {
     return (
         <>
          {/* Profile Summary Card */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-2xl p-4 border border-border">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
               Your Profile
             </h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600">Skill</span>
-                <div className="flex gap-1 flex-wrap justify-end">
+              <div>
+                <span className="text-xs text-muted-foreground">Skills</span>
+                <div className="flex gap-1.5 flex-wrap mt-1.5">
                   {workerProfile?.skills?.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="text-sm font-semibold text-gray-900"
+                      className="text-xs font-medium text-foreground bg-secondary rounded-full px-3 py-1"
                     >
                       {skill}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="border-t border-gray-200 pt-3 flex items-center justify-between">
-                <span className="text-xs text-gray-600">Minimum Wage</span>
-                <span className="text-sm font-semibold text-gray-900">
-                  ₹{workerProfile?.minimumWage ?? "N/A"}
+              <div className="border-t border-border pt-3 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Minimum Wage</span>
+                <span className="text-sm font-semibold text-primary">
+                  ₹{workerProfile?.minimumWage ?? "N/A"} / day
                 </span>
               </div>
               {/* TODO: jobs-completed count and rating aren't exposed by the

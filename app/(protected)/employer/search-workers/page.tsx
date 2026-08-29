@@ -1,155 +1,163 @@
-// "use client";
+"use client";
 
-// import { useState } from "react";
-// import Link from "next/link";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import {
-//   Search,
-//   MapPin,
-//   Star,
-//   Briefcase,
-//   ChevronLeft,
-//   Heart,
-// } from "lucide-react";
-// import { EmployerNav } from "@/components/navigation/EmployerNav";
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, ShieldCheck, Star } from "lucide-react";
+import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
 
-// const FILTERS = ["सब / All", "निकट / Nearest", "शीर्ष रेटेड / Top Rated"];
+// NOTE: No worker-search query/action exists anywhere in lib/queries or
+// lib/actions yet (verified via codebase search). This is a static visual
+// shell with sample data — wire it up to a real data source once one exists.
+
+const FILTERS = ["Nearby", "Verified", "Free today"];
+
+const SAMPLE_WORKERS = [
+  {
+    id: "1",
+    name: "Ramesh Kumar",
+    verified: true,
+    skills: ["Mason", "Painter"],
+    rating: 4.8,
+    jobs: 42,
+    distance: "1.2 km",
+    wage: 650,
+  },
+  {
+    id: "2",
+    name: "Suresh Yadav",
+    verified: true,
+    skills: ["Electrician"],
+    rating: 4.6,
+    jobs: 28,
+    distance: "2.4 km",
+    wage: 800,
+  },
+  {
+    id: "3",
+    name: "Anita Devi",
+    verified: false,
+    skills: ["Plumber", "Carpenter"],
+    rating: 4.3,
+    jobs: 15,
+    distance: "3.1 km",
+    wage: 700,
+  },
+];
 
 export default function SearchWorkersPage() {
-//   const [query, setQuery] = useState("");
-//   const [filter, setFilter] = useState<string | null>(null);
-//   const [favorites, setFavorites] = useState<string[]>([]);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<string | null>(null);
 
-//   const toggleFavorite = (id: string) => {
-//     setFavorites((prev) =>
-//       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-//     );
-//   };
+  const workers = SAMPLE_WORKERS;
 
-  //  return (
-//     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
-//       {/* Header */}
-//       <div className="sticky top-0 z-40 bg-blue-600 text-white shadow-sm">
-//         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-//           <Link href="/employer/home">
-//             <ChevronLeft className="w-6 h-6 cursor-pointer" />
-//           </Link>
-//           <div>
-//             <h1 className="text-2xl font-bold">मजदूर खोजें</h1>
-//             <p className="text-sm text-blue-100">Search workers</p>
-//           </div>
-//         </div>
-//       </div>
+  const initials = (name: string) =>
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("");
 
-//       {/* Search + Filter */}
-//       <div className="max-w-4xl mx-auto px-4 py-4 space-y-3 sticky top-16 bg-white border-b z-30">
-//         <div className="relative">
-//           <Search className="w-4 h-4 absolute left-3 top-3.5 text-gray-500" />
-//           <Input
-//             placeholder="नाम या कौशल खोजें..."
-//             className="pl-10 h-10 rounded-lg"
-//             value={query}
-//             onChange={(e) => setQuery(e.target.value)}
-//           />
-//         </div>
+  return (
+    <div className="min-h-screen bg-white pb-24">
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white pt-4">
+        <div className="max-w-6xl mx-auto px-4 pb-4 flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold text-foreground">Find workers</h1>
+          <EmployerNavLinks />
+        </div>
+      </div>
 
-//         <div className="flex gap-2 overflow-x-auto pb-1">
-//           {FILTERS.map((f) => (
-//             <button
-//               key={f}
-//               onClick={() => setFilter(filter === f ? null : f)}
-//               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-//                 filter === f
-//                   ? "bg-blue-600 text-white"
-//                   : "bg-gray-100 text-gray-700"
-//               }`}
-//             >
-//               {f}
-//             </button>
-//           ))}
-//         </div>
-//       </div>
+      {/* Search + Filter */}
+      <div className="max-w-6xl mx-auto px-4 space-y-3">
+        <div className="relative md:max-w-md">
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Name or skill"
+            className="pl-10"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
 
-//       {/* Count */}
-//       <div className="max-w-4xl mx-auto px-4 pt-4 text-sm text-gray-600">
-//         {workers.length} मजदूर मिले / {workers.length} workers found
-//       </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(filter === f ? null : f)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                filter === f
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
 
-//       {/* Worker Cards */}
-//       <div className="max-w-4xl mx-auto px-4 py-4 space-y-4">
-//         {workers.map((w) => (
-//           <div
-//             key={w.id}
-//             className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition"
-//           >
-//             <div className="p-4">
-//               {/* Top */}
-//               <div className="flex justify-between mb-3">
-//                 <div className="flex gap-3">
-//                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl">
-//                     {w.image}
-//                   </div>
+      {/* Count */}
+      <div className="max-w-6xl mx-auto px-4 pt-4 pb-2 text-sm text-gray-500">
+        {workers.length} workers found
+      </div>
 
-//                   <div>
-//                     <div className="flex items-center gap-2">
-//                       <h3 className="font-semibold">{w.name}</h3>
-//                       {w.verified && <span className="text-blue-600">✓</span>}
-//                     </div>
-//                     <p className="text-sm text-gray-600">{w.skill}</p>
-//                   </div>
-//                 </div>
+      {/* Worker Cards */}
+      <div className="max-w-6xl mx-auto px-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {workers.map((w) => (
+          <div
+            key={w.id}
+            className="rounded-2xl border border-border p-4 flex flex-col bg-white"
+          >
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                <span className="text-sm font-semibold text-foreground">
+                  {initials(w.name)}
+                </span>
+              </div>
 
-//                 <button onClick={() => toggleFavorite(w.id)}>
-//                   <Heart
-//                     className="w-5 h-5 text-gray-400"
-//                     fill={favorites.includes(w.id) ? "currentColor" : "none"}
-//                   />
-//                 </button>
-//               </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-bold text-foreground truncate">{w.name}</h3>
+                  {w.verified && (
+                    <span className="inline-flex items-center gap-0.5 text-primary text-xs font-semibold shrink-0">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Verified
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 truncate">{w.skills.join(" · ")}</p>
+              </div>
+            </div>
 
-//               {/* Rating */}
-//               <div className="flex justify-between mb-3">
-//                 <div className="flex items-center gap-2">
-//                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-//                   <span className="font-semibold">{w.rating}</span>
-//                   <span className="text-sm text-gray-600">
-//                     ({w.reviews} reviews)
-//                   </span>
-//                 </div>
+            <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+              <Star className="w-3.5 h-3.5 text-warning-muted-foreground fill-current" />
+              <span>{w.rating}</span>
+              <span>· {w.jobs} jobs · {w.distance}</span>
+            </div>
 
-//                 <div className="flex items-center gap-1 text-gray-600">
-//                   <MapPin className="w-4 h-4" />
-//                   {w.distance} km
-//                 </div>
-//               </div>
+            <p className="text-lg font-bold text-primary mb-3">
+              ₹{w.wage}
+            </p>
 
-//               {/* Bottom */}
-//               <div className="flex justify-between items-center">
-//                 <div>
-//                   <p className="text-xs text-gray-600">Daily Rate</p>
-//                   <p className="text-lg font-bold text-green-600">₹{w.wage}</p>
-//                 </div>
+            <div className="flex gap-2 mt-auto">
+              <Link href={`/employer/worker/${w.id}`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  Profile
+                </Button>
+              </Link>
 
-//                 <div className="flex gap-2">
-//                   <Link href={`/employer/worker/${w.id}`}>
-//                     <Button variant="outline" size="sm">
-//                       View Profile
-//                     </Button>
-//                   </Link>
+              <Button size="sm" className="flex-1">
+                Hire
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
 
-//                   <Button size="sm" className="bg-blue-600">
-//                     <Briefcase className="w-3 h-3 mr-1" />
-//                     Hire
-//                   </Button>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//       <EmployerNav />
-//     </div>
-  // );
- }
+      <EmployerNav />
+    </div>
+  );
+}

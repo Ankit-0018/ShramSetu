@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 760">
+<defs>
+  <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#20D7FF"/>
+    <stop offset="48%" stop-color="#1767F2"/>
+    <stop offset="100%" stop-color="#48E36A"/>
+  </linearGradient>
+  <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#071A52"/>
+    <stop offset="50%" stop-color="#0B55D9"/>
+    <stop offset="100%" stop-color="#12C9A5"/>
+  </linearGradient>
+</defs>
+
+<!-- Symbol -->
+<g transform="translate(70,95)">
+  <rect x="0" y="0" width="570" height="570" rx="135" fill="#F7FAFF"/>
+  <path d="M110 455 L190 190 Q208 135 260 135 L300 135 L230 440 L165 485 Z" fill="url(#ribbon)"/>
+  <path d="M300 135 L360 135 Q400 135 420 165 L520 450 L465 485 L335 265 L290 365 L260 305 Z" fill="url(#ribbon)"/>
+  <circle cx="235" cy="310" r="27" fill="#071A52"/>
+  <path d="M198 380 Q235 325 272 380 L272 440 L198 440Z" fill="#071A52"/>
+  <circle cx="365" cy="310" r="27" fill="#48E36A"/>
+  <path d="M328 380 Q365 325 402 380 L402 440 L328 440Z" fill="#48E36A"/>
+  <path d="M265 365 Q305 340 335 365" fill="none" stroke="#071A52" stroke-width="18" stroke-linecap="round"/>
+</g>
+
+<!-- Wordmark -->
+<text x="720" y="325" font-family="Inter, Arial, Helvetica, sans-serif" font-size="205" font-weight="800" letter-spacing="-8" fill="url(#word)">ApnaKaam</text>
+<text x="735" y="415" font-family="Inter, Arial, Helvetica, sans-serif" font-size="43" font-weight="600" letter-spacing="12" fill="#17315F">WORK • PEOPLE • OPPORTUNITIES</text>
+<text x="735" y="510" font-family="Inter, Arial, Helvetica, sans-serif" font-size="58" font-weight="500" fill="#071A52">Better Work. <tspan fill="#12AFA0">Brighter Lives.</tspan></text>
+
+<!-- global / progress swoosh -->
+<path d="M735 570 Q1220 485 1850 560 Q1980 575 2115 505" fill="none" stroke="url(#ribbon)" stroke-width="18" stroke-linecap="round"/>
+<path d="M2095 492 L2145 500 L2112 535" fill="none" stroke="#12C9A5" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

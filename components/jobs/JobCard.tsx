@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NearbyJob } from "@/lib/types/job";
 import { useRouter } from "next/navigation";
 
@@ -21,54 +21,46 @@ export function JobCard({ job }: JobCardProps) {
         }
     };
 
-    return (
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-3">
-                <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-sm">{job.title}</h3>
-                    <p className="text-xs text-gray-600 mt-1">
-                        {job.employer?.name || "Unknown"}
-                    </p>
-                </div>
-                <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">₹{job.minimumWage}</p>
-                    <p className="text-xs text-gray-600">{job.jobType}</p>
-                </div>
-            </div>
+    const metaParts = [
+        typeof job.distanceKm === "number" ? `${job.distanceKm.toFixed(1)} km` : null,
+        job.jobType,
+    ].filter(Boolean);
 
-            <div className="flex items-center justify-between">
-                <div className="flex gap-2 flex-wrap">
-                    <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded">
-                        {job.primarySkill}
-                    </span>
-                    {job.location?.formattedAddress && (
-                        <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded">
-                            {job.location.formattedAddress}
-                        </span>
-                    )}
-                    {typeof job.distanceKm === "number" && (
-                        <span className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded">
-                            {job.distanceKm.toFixed(1)} km
-                        </span>
-                    )}
+    return (
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={() => handleViewJob(job.id)}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") handleViewJob(job.id);
+            }}
+            className="flex items-start justify-between gap-3 cursor-pointer rounded-2xl border border-border bg-card p-4 h-full transition-shadow hover:shadow-md"
+        >
+            <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-foreground text-sm truncate">{job.title}</h3>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewEmployer(job.employer?.id);
+                    }}
+                    className="text-xs text-muted-foreground mt-0.5 truncate hover:text-primary hover:underline text-left"
+                >
+                    {job.employer?.name || "Unknown"}
+                </button>
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                    {metaParts.length > 0 && <span>{metaParts.join(" · ")}</span>}
+                    {job.primarySkill && <Badge variant="outline">{job.primarySkill}</Badge>}
                 </div>
-                <div className="flex gap-2">
-                    <Button
-                        size="sm"
-                        className="text-xs h-8"
-                        onClick={() => handleViewJob(job.id)}
-                    >
-                        View Job
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs h-8"
-                        onClick={() => handleViewEmployer(job.employer?.id)}
-                    >
-                        View Employer
-                    </Button>
-                </div>
+                {job.location?.formattedAddress && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {job.location.formattedAddress}
+                    </p>
+                )}
+            </div>
+            <div className="text-right shrink-0">
+                <p className="text-base font-bold text-primary">₹{job.minimumWage}</p>
+                <p className="text-xs text-muted-foreground">/ day</p>
             </div>
         </div>
     );

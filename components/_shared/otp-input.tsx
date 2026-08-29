@@ -58,23 +58,28 @@ export function CustomOTPInput({
   };
 
   return (
-    <div className="flex gap-4 justify-center">
-      {[...Array(maxLength)].map((_, index) => (
-        <input
-          key={index}
-          id={`otp-${index}`}
-          type="password"
-          inputMode="numeric"
-          maxLength={1}
-          value={value[index] || ""}
-          onChange={(e) =>
-            handleChange(index, e.target.value.replace(/\D/g, ""))
-          }
-          onKeyDown={(e) => handleKeyDown(index, e)}
-          onPaste={handlePaste}
-          className="w-full h-10 border border-blue-600 bg-white rounded-sm text-center text-2xl font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      ))}
+    <div className="flex justify-center gap-2.5">
+      {[...Array(maxLength)].map((_, index) => {
+        const filled = Boolean(value[index]);
+        return (
+          <input
+            key={index}
+            id={`otp-${index}`}
+            type="password"
+            inputMode="numeric"
+            maxLength={1}
+            value={value[index] || ""}
+            onChange={(e) =>
+              handleChange(index, e.target.value.replace(/\D/g, ""))
+            }
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            onPaste={handlePaste}
+            className={`h-14 w-11 rounded-2xl border-2 bg-secondary text-center text-2xl font-bold outline-none transition-colors focus:border-primary focus:bg-background ${
+              filled ? "border-primary bg-success-muted" : "border-transparent"
+            }`}
+          />
+        );
+      })}
     </div>
   );
 }

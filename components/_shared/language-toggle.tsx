@@ -16,10 +16,10 @@ export function LanguageToggle() {
     return (
       <button
         disabled
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold text-white/50 border border-white/20"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-muted-foreground border border-border bg-secondary"
       >
-        <Globe className="w-4 h-4" />
-        <span className="hidden sm:inline">EN</span>
+        <Globe className="w-3.5 h-3.5" />
+        <span>EN</span>
       </button>
     );
   }
@@ -27,17 +27,12 @@ export function LanguageToggle() {
   return (
     <button
       onClick={toggleLanguage}
-      className="inline-flex items-center gap-2 px-3 py-2 rounded-full hover:bg-white/20 active:bg-white/30 transition-colors text-sm font-semibold text-white border border-white/30 hover:border-white/50"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-accent active:bg-accent transition-colors text-xs font-semibold text-foreground border border-border bg-secondary"
       title={`Click to switch language: ${language === "en" ? "Switch to हिंदी" : "Switch to English"}`}
       aria-label={`Current language: ${language === "en" ? "English" : "हिंदी"}. Click to toggle.`}
     >
-      <Globe className="w-4 h-4" />
-      <span className="hidden sm:inline">
-        {language === "en" ? "EN" : "HI"}
-      </span>
-      <span className="hidden sm:inline text-xs opacity-75">
-        {language === "en" ? "(हिंदी)" : "(English)"}
-      </span>
+      <Globe className="w-3.5 h-3.5" />
+      <span>{language === "en" ? "EN" : "HI"}</span>
     </button>
   );
 }

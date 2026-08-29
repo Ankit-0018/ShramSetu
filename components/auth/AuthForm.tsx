@@ -13,38 +13,43 @@ export default function AuthForm({
 }: Props) {
   const {formData, formError, handleSubmit, handleInputChange, confirmationResult, loading, isPending } = useAuthActions(mode);
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {mode === "REGISTER" && !confirmationResult && (
-        <div className="relative space-y-2">
-          <label className="block text-sm font-medium text-black">
-            Full Name
+        <div className="space-y-1.5">
+          <label className="block text-sm font-semibold text-foreground">
+            Full name
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => handleInputChange("name", e.target.value)}
             placeholder="e.g. John Smith"
-            className="w-full px-4 py-3 bg-gray-100 rounded-xl"
+            className="h-12 w-full rounded-xl bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             required
           />
-          {formError?.nameErr && <p className="text-xs text-red-500">{formError.nameErr}</p>}
+          {formError?.nameErr && <p className="text-xs text-destructive">{formError.nameErr}</p>}
         </div>
       )}
 
       {!confirmationResult && (
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-black">
-            Mobile Number
+        <div className="space-y-1.5">
+          <label className="block text-sm font-semibold text-foreground">
+            Mobile number
           </label>
-          <input
-            type="tel"
-            value={formData.mobile}
-            onChange={(e) => handleInputChange("mobile", e.target.value)}
-            placeholder="+91 xxxxxxxxxx"
-            className="w-full px-4 py-3 bg-gray-100 rounded-xl"
-            required
-          />
-          {formError?.mobileErr && <p className="text-xs text-red-500">{formError.mobileErr}</p>}
+          <div className="flex h-12 items-stretch overflow-hidden rounded-xl bg-secondary focus-within:ring-2 focus-within:ring-ring/50">
+            <span className="flex items-center border-r border-border/70 px-3 text-base font-medium text-muted-foreground">
+              +91
+            </span>
+            <input
+              type="tel"
+              value={formData.mobile}
+              onChange={(e) => handleInputChange("mobile", e.target.value)}
+              placeholder="98XXXXXXXX"
+              className="h-full w-full bg-transparent px-4 text-base outline-none"
+              required
+            />
+          </div>
+          {formError?.mobileErr && <p className="text-xs text-destructive">{formError.mobileErr}</p>}
         </div>
       )}
 
@@ -55,7 +60,7 @@ export default function AuthForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 rounded-2xl transition disabled:opacity-50"
+        className="flex h-14 w-full items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
       >
         {loading || isPending
           ? <Spinner fullscreen={false} />

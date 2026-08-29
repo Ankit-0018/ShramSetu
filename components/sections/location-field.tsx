@@ -16,7 +16,7 @@ interface LocationFieldProps {
 export default function LocationField({ showMap = false }: LocationFieldProps) {
   const { user, location, locationError, locationLoading } = useUserStore();
   const { startTracking, isTracking, stopTracking } = useLiveLocation();
-  if (!user) return;
+  if (!user) return null;
 
   const handleClearLocation = () => {
     stopTracking();
@@ -24,44 +24,44 @@ export default function LocationField({ showMap = false }: LocationFieldProps) {
   return (
     <div className="space-y-3">
       {/* Location display */}
-      <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <MapPin className="w-5 h-5 text-blue-600 shrink-0" />
+      <div className="flex items-center gap-2 rounded-xl bg-secondary p-3">
+        <MapPin className="w-5 h-5 text-primary shrink-0" />
 
         {locationLoading ? (
-          <span className="text-sm text-gray-600">Detecting location…</span>
+          <span className="text-sm text-muted-foreground">Detecting location…</span>
         ) : location?.address ? (
-          <span className="text-sm text-gray-900">{location.address}</span>
+          <span className="text-sm text-foreground">{location.address}</span>
         ) : (
-          <span className="text-sm text-gray-600">Location not selected</span>
+          <span className="text-sm text-muted-foreground">Location not selected</span>
         )}
 
-        <span className="ml-auto text-xs text-gray-600">3 km radius</span>
+        <span className="ml-auto text-xs text-muted-foreground">3 km radius</span>
       </div>
 
       {/* Map (optional) */}
       {showMap && location && (
-        <div className="w-full h-75 rounded-lg overflow-hidden border">
+        <div className="w-full h-75 rounded-2xl overflow-hidden border border-border">
           <LiveMap lat={location.lat} lng={location.lng} />
         </div>
       )}
 
       {/* Error */}
-      {locationError && <p className="text-xs text-red-600">{locationError}</p>}
+      {locationError && <p className="text-xs text-destructive">{locationError}</p>}
 
       {/* Action */}
       <button
         type="button"
         onClick={location ? handleClearLocation : startTracking}
-        className={`px-3 py-1.5 text-xs font-medium rounded-md text-white ${
+        className={`rounded-full px-4 py-1.5 text-xs font-semibold text-white transition ${
           location
-            ? "bg-red-600 hover:bg-red-700"
-            : "bg-blue-600 hover:bg-blue-700"
+            ? "bg-destructive hover:bg-destructive/90"
+            : "bg-primary hover:bg-primary/90"
         }`}
       >
         {location ? "Stop Location" : "Select Location"}
       </button>
 
-      <p className="text-xs text-gray-600">
+      <p className="text-xs text-muted-foreground">
         Automatically detected using your device&apos;s GPS.
       </p>
     </div>

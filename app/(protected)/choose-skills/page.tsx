@@ -4,15 +4,25 @@ import { useUserStore } from "@/lib/stores/useUserStore";
 import { apiFetch, ApiError } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  Hammer,
+  Paintbrush,
+  Wrench,
+  Zap,
+  Droplet,
+  Flame,
+  Trash2,
+  Check,
+} from "lucide-react";
 
 const skillsList = [
-  "Plumber",
-  "Electrician",
-  "Carpenter",
-  "Painter",
-  "Mason",
-  "Welder",
-  "Cleaner",
+  { name: "Mason", icon: Hammer },
+  { name: "Painter", icon: Paintbrush },
+  { name: "Carpenter", icon: Wrench },
+  { name: "Electrician", icon: Zap },
+  { name: "Plumber", icon: Droplet },
+  { name: "Welder", icon: Flame },
+  { name: "Cleaner", icon: Trash2 },
 ];
 
 const InfoPage = () => {
@@ -89,54 +99,82 @@ const InfoPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-semibold mb-4">Worker Information</h1>
+    <div className="min-h-screen bg-background px-5 py-8 pb-28 sm:mx-auto sm:max-w-md">
+      <p className="text-xs font-bold tracking-wide text-primary mb-1">Step 2 of 2</p>
+      <h1 className="text-2xl font-extrabold text-foreground mb-1.5">
+        Set up your worker profile
+      </h1>
+      <p className="text-sm text-muted-foreground mb-6">
+        This helps us match you with the right jobs.
+      </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Skills */}
         <div>
-          <p className="font-medium mb-2">Choose Skills</p>
+          <p className="font-semibold text-foreground mb-3">Your skills</p>
 
-          <div className="grid grid-cols-2 gap-2">
-            {skillsList.map((skill) => (
-              <label
-                key={skill}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedSkills.includes(skill)}
-                  onChange={() => toggleSkill(skill)}
-                />
-
-                {skill}
-              </label>
-            ))}
+          <div className="grid grid-cols-2 gap-3">
+            {skillsList.map(({ name: skill, icon: Icon }) => {
+              const selected = selectedSkills.includes(skill);
+              return (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => toggleSkill(skill)}
+                  className={`flex items-center gap-2.5 rounded-2xl border-2 px-4 py-3.5 text-left font-semibold transition ${
+                    selected
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <Icon className="size-4.5 shrink-0" />
+                  {skill}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Daily Wage */}
         <div>
-          <label className="block font-medium mb-1">Daily Wage (₹)</label>
+          <label className="block font-semibold text-foreground mb-2">
+            Minimum daily wage
+          </label>
 
-          <input
-            type="number"
-            value={dailyWage}
-            onChange={(e) => setDailyWage(e.target.value)}
-            className="w-full border rounded p-2"
-            placeholder="Enter daily wage"
-          />
+          <div className="flex h-14 items-center gap-1 rounded-2xl bg-secondary px-4">
+            <span className="text-2xl font-extrabold text-primary">₹</span>
+            <input
+              type="number"
+              value={dailyWage}
+              onChange={(e) => setDailyWage(e.target.value)}
+              className="h-full flex-1 bg-transparent text-2xl font-extrabold text-primary outline-none"
+              placeholder="700"
+            />
+            <span className="text-sm text-muted-foreground">/ day</span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Jobs paying less than this won&apos;t be shown to you.
+          </p>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-sm text-muted-foreground">
+            {selectedSkills.length} skill{selectedSkills.length === 1 ? "" : "s"} selected
+          </p>
+          {selectedSkills.length > 0 && (
+            <Check className="size-4 text-primary" strokeWidth={3} />
+          )}
+        </div>
 
         {/* Submit */}
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
+          className="flex h-14 w-full items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
         >
-          {submitting ? "Saving..." : "Save"}
+          {submitting ? "Saving..." : "Finish setup"}
         </button>
       </form>
     </div>

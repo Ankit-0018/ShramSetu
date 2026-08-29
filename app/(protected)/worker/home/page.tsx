@@ -8,20 +8,20 @@ import WorkerHomeUI from "@/components/worker/workerHomeUI";
 import Spinner from "@/components/_shared/spinner";
 
 export default function WorkerHome() {
-  const { user } = useUserStore.getState();
+  const user = useUserStore((s) => s.user);
   // Availability is pure client-side UI state; the backend has no
   // persistence for it, so we just keep it in local state.
   const [workStatus, setWorkStatusState] = useState<WorkingStatus>("available");
   const [data, setData] = useState<WorkerDashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  if (!user) return null;
-
   const handleStatusChange = (newStatus: WorkingStatus) => {
     setWorkStatusState(newStatus);
   };
 
   useEffect(() => {
+    if (!user) return;
+
     const loadDashboard = async () => {
       setLoading(true);
       try {
@@ -37,6 +37,7 @@ export default function WorkerHome() {
     loadDashboard();
   }, [user]);
 
+  if (!user) return null;
   if (loading) return <Spinner />;
 
   return (

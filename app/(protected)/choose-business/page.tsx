@@ -4,6 +4,7 @@ import { useUserStore } from "@/lib/stores/useUserStore";
 import { apiFetch, ApiError } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Building2 } from "lucide-react";
 
 const ChooseBusinessPage = () => {
   const [employerType, setEmployerType] = useState<"INDIVIDUAL" | "BUSINESS">(
@@ -73,66 +74,88 @@ const ChooseBusinessPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-semibold mb-4">Employer Information</h1>
+    <div className="min-h-screen bg-background px-5 py-8 pb-28 sm:mx-auto sm:max-w-md">
+      <p className="text-xs font-bold tracking-wide text-primary mb-1">Step 2 of 2</p>
+      <h1 className="text-2xl font-extrabold text-foreground mb-1.5">
+        Set up your employer profile
+      </h1>
+      <p className="text-sm text-muted-foreground mb-6">
+        Workers see this before they apply.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
-          <p className="font-medium mb-2">Employer Type</p>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="employerType"
-              checked={employerType === "INDIVIDUAL"}
-              onChange={() => setEmployerType("INDIVIDUAL")}
-            />
-            Individual
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              name="employerType"
-              checked={employerType === "BUSINESS"}
-              onChange={() => setEmployerType("BUSINESS")}
-            />
-            Business
-          </label>
+        <div className="flex flex-col items-center py-2">
+          <div className="flex size-20 items-center justify-center rounded-full border-2 border-dashed border-border bg-secondary text-muted-foreground">
+            <Building2 className="size-8" />
+          </div>
+          <p className="mt-2 text-sm font-semibold text-primary">Add profile photo</p>
+        </div>
+
+        <div>
+          <p className="font-semibold text-foreground mb-2">You are hiring as</p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setEmployerType("INDIVIDUAL")}
+              className={`h-12 rounded-full border-2 font-semibold transition ${
+                employerType === "INDIVIDUAL"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-foreground"
+              }`}
+            >
+              Individual
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmployerType("BUSINESS")}
+              className={`h-12 rounded-full border-2 font-semibold transition ${
+                employerType === "BUSINESS"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-foreground"
+              }`}
+            >
+              Business
+            </button>
+          </div>
         </div>
 
         {employerType === "BUSINESS" && (
           <>
             <div>
-              <label className="block font-medium mb-1">Business Name</label>
+              <label className="block font-semibold text-foreground mb-2">Business name</label>
               <input
                 type="text"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full border rounded p-2"
-                placeholder="e.g. ShramSetu Services"
+                className="h-12 w-full rounded-xl bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                placeholder="e.g. Rajesh Kumar Builders"
               />
             </div>
 
             <div>
-              <label className="block font-medium mb-1">GST Number (optional)</label>
+              <label className="flex items-baseline justify-between font-semibold text-foreground mb-2">
+                GST number
+                <span className="text-xs font-normal text-muted-foreground">Optional</span>
+              </label>
               <input
                 type="text"
                 value={gst}
                 onChange={(e) => setGst(e.target.value)}
-                className="w-full border rounded p-2"
+                className="h-12 w-full rounded-xl bg-secondary px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 placeholder="27ABCDE1234F1Z5"
               />
             </div>
           </>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-black text-white py-2 rounded disabled:opacity-50"
+          className="flex h-14 w-full items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
         >
-          {submitting ? "Saving..." : "Save"}
+          {submitting ? "Saving..." : "Finish setup"}
         </button>
       </form>
     </div>

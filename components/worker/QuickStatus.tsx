@@ -14,32 +14,33 @@ export default function QuickStats({workStatus, data}: Props) {
          {/* Quick Stats */}
           {isWorking && (
               <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                  <div className="text-2xl font-bold text-blue-600">
+              {/* Stats Row */}
+              <div className="flex items-center">
+                <div className="flex-1">
+                  <p className="text-2xl font-bold text-foreground">
+                    ₹{data?.todayEarnings ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Earned today
+                  </p>
+                </div>
+                <div className="w-px h-10 bg-border mx-4" />
+                <div className="flex-1">
+                  <p className="text-2xl font-bold text-foreground">
                     {data?.nearbyJobsCount ?? 0}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">Nearby Jobs</p>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Jobs nearby
+                    {data?.closestJobDistance
+                      ? ` · ${data.closestJobDistance}`
+                      : ""}
+                  </p>
                 </div>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-                  <div className="text-2xl font-bold text-green-600">
-                    {data?.closestJobDistance ?? "N/A"}
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">Closest Job</p>
-                </div>
-              </div>
-
-              {/* Earnings Card */}
-              <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
-                <p className="text-xs text-gray-600 mb-1">Today&apos;s Earnings</p>
-                <p className="text-3xl font-bold text-green-600">
-                  ₹{data?.todayEarnings ?? 0}
-                </p>
               </div>
 
               {/* Action Button */}
               <Link href="/worker/search">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl">
+                <Button variant="default" size="lg" className="w-full">
                   <Briefcase className="w-4 h-4 mr-2" />
                   View Nearby Jobs
                 </Button>

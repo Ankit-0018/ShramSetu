@@ -18,7 +18,7 @@ export default function WorkerSearchPage() {
         {/* Header */}
         <div className="worker-header">
           <div className="worker-header-content">
-            <h1 className="worker-header-title">Jobs</h1>
+            <h1 className="worker-header-title">Find work</h1>
           </div>
         </div>
 
@@ -27,13 +27,13 @@ export default function WorkerSearchPage() {
           <div className="flex gap-2">
 
             <div className="flex-1 relative">
-              <SearchIcon className="w-4 h-4 absolute left-3 top-3.5 text-muted-foreground" />
+              <SearchIcon className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
 
               <Input
                 placeholder="Search jobs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-11"
               />
             </div>
 

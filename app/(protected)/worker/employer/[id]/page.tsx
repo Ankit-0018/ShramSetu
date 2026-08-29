@@ -62,53 +62,56 @@ export default function EmployerProfilePage() {
         <div className="px-4 py-3">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </button>
         </div>
 
-        <div className="px-4 space-y-6 pb-32">
+        <div className="px-4 space-y-6 pb-32 lg:max-w-2xl lg:mx-auto">
           {/* Header Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50 z-0"></div>
+          <div className="flex flex-col items-start px-2">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold mb-4">
+              {employer.fullName?.charAt(0) || "U"}
+            </div>
+            <h1 className="text-xl font-bold text-foreground">
+              {employer.fullName}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {employerProfile?.businessName || "Individual"}
+            </p>
+            {/* NOTE: employer verification status isn't provided by the
+                backend yet, so a "Verified employer" badge isn't shown. */}
+          </div>
 
-            <div className="relative z-10">
-              <div className="flex items-center mb-4">
-                <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg mr-4">
-                  {employer.fullName?.charAt(0) || "U"}
+          {/* NOTE: ratings/reviews aren't provided by the backend yet, so
+              that UI has been removed rather than showing fake data. */}
+
+          {/* Info rows */}
+          {employerProfile?.employerType && (
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                  <Building2 className="w-5 h-5 text-accent-foreground" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">
-                    {employer.fullName}
-                  </h1>
-                  <p className="text-sm text-gray-600">
-                    {employerProfile?.businessName || "Individual"}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Employer type</p>
+                  <p className="font-medium truncate">
+                    {employerProfile.employerType}
                   </p>
                 </div>
               </div>
-
-              {/* NOTE: ratings/reviews aren't provided by the backend yet, so
-                  that UI has been removed rather than showing fake data. */}
-              {employerProfile?.employerType && (
-                <div className="pt-4 border-t border-gray-100">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-                    {employerProfile.employerType}
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
+          )}
 
           {/* About Section */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <User className="w-4 h-4 mr-2 text-blue-500" />
+          <div className="rounded-2xl border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
               About
             </h2>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {employerProfile?.gstNumber
                 ? `GST: ${employerProfile.gstNumber}`
                 : "No additional information provided"}

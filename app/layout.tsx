@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import AuthProvider from "@/providers/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "ShramSetu - Hire Trusted Labour Workers",
+  title: "ApnaKaam - Work · People · Opportunities",
   description:
     "Connect with trusted labour workers in your area. Plumbers, electricians, carpenters, and more.",
   generator: "v0.app",

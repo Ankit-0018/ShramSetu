@@ -7,11 +7,10 @@ import { useUserStore } from "@/lib/stores/useUserStore";
 import { getMyApplications } from "@/lib/queries/applications";
 import { getMyAssignedJobs } from "@/lib/queries/assignments";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PillTabs } from "@/components/ui/pill-tabs";
 import {
   Briefcase,
-  Clock,
-  CheckCircle2,
-  XCircle,
   ChevronRight,
   ClipboardList,
 } from "lucide-react";
@@ -51,38 +50,24 @@ export default function MyApplicationsPage() {
     fetchData();
   }, [user]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (
+    status: string,
+  ): "warning" | "success" | "danger" | "outline" | "default" => {
     switch (status) {
       case "PENDING":
-        return "text-yellow-600 bg-yellow-50 border-yellow-100";
+        return "warning";
       case "ACCEPTED":
-        return "text-green-600 bg-green-50 border-green-100";
+        return "success";
       case "REJECTED":
-        return "text-red-600 bg-red-50 border-red-100";
+        return "danger";
       case "COMPLETED":
-        return "text-blue-600 bg-blue-50 border-blue-100";
+        return "outline";
       case "IN_PROGRESS":
-        return "text-green-600 bg-green-50 border-green-100";
+        return "success";
       case "CANCELLED":
-        return "text-orange-600 bg-orange-50 border-orange-100";
+        return "danger";
       default:
-        return "text-gray-600 bg-gray-50 border-gray-100";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return <Clock className="w-3 h-3 mr-1" />;
-      case "ACCEPTED":
-      case "IN_PROGRESS":
-        return <CheckCircle2 className="w-3 h-3 mr-1" />;
-      case "REJECTED":
-        return <XCircle className="w-3 h-3 mr-1" />;
-      case "COMPLETED":
-        return <CheckCircle2 className="w-3 h-3 mr-1" />;
-      default:
-        return null;
+        return "default";
     }
   };
 
@@ -91,76 +76,56 @@ export default function MyApplicationsPage() {
       <div className="worker-layout">
         <WorkerHeader title="My Applications" />
 
-        {/* Custom Tabs */}
-        <div className="px-4 py-4 sticky top-14 bg-white z-30 border-b border-gray-100">
-          <div className="flex bg-gray-100 p-1 rounded-xl">
-            <button
-              onClick={() => setActiveTab("applications")}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-                activeTab === "applications"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Applications
-            </button>
-            <button
-              onClick={() => setActiveTab("assignments")}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-                activeTab === "assignments"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Assignments
-            </button>
-          </div>
+        {/* Tabs */}
+        <div className="px-4 py-4 sticky top-14 bg-background z-30 border-b border-border">
+          <PillTabs
+            items={[
+              { key: "applications", label: "Applied", count: applications.length },
+              { key: "assignments", label: "Assigned", count: assignments.length },
+            ]}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as Tab)}
+          />
         </div>
 
-        <div className="px-4 py-6 space-y-4 pb-32">
+        <div className="px-4 py-2 pb-32">
           {loading ? (
             <div className="flex justify-center py-20">
               <Spinner />
             </div>
           ) : activeTab === "applications" ? (
             applications.length > 0 ? (
-              applications.map((app) => (
-                <Link
-                  href={`/worker/jobs/${app.jobId}`}
-                  key={app.id}
-                  className="block bg-white rounded-2xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition group"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {applications.map((app) => (
+                  <Link
+                    href={`/worker/jobs/${app.jobId}`}
+                    key={app.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-foreground text-sm truncate">
                         {app.job?.title || "Job Application"}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
                         {app.job?.location?.formattedAddress}
+                        {app.job?.location?.formattedAddress && " · "}
+                        {app.createdAt
+                          ? new Date(app.createdAt).toLocaleDateString()
+                          : "recently"}
                       </p>
                     </div>
-                    <div
-                      className={`flex items-center text-[10px] font-bold px-2 py-1 rounded-full border ${getStatusColor(app.status)}`}
-                    >
-                      {getStatusIcon(app.status)}
-                      {app.status.toUpperCase()}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant={getStatusVariant(app.status)}>
+                        {app.status}
+                      </Badge>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center">
-                      <Clock className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                      Applied on{" "}
-                      {app.createdAt
-                        ? new Date(app.createdAt).toLocaleDateString()
-                        : "recently"}
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-blue-600 transition-colors" />
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                ))}
+              </div>
             ) : (
               <EmptyState
-                icon={<Briefcase className="w-12 h-12 text-gray-300" />}
+                icon={<Briefcase className="w-12 h-12 text-muted-foreground" />}
                 title="No applications"
                 description="You haven't applied to any jobs yet."
                 actionLink="/worker/search"
@@ -168,43 +133,33 @@ export default function MyApplicationsPage() {
               />
             )
           ) : assignments.length > 0 ? (
-            assignments.map((assign) => (
-              <div
-                key={assign.id}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 hover:shadow-md transition group"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {assignments.map((assign) => (
+                <div
+                  key={assign.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4"
+                >
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-foreground text-sm truncate">
                       {assign.job?.title || "Assigned Task"}
                     </h3>
-                    <p className="text-xs text-gray-600 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1 truncate">
                       {assign.job?.location?.formattedAddress}
+                      {assign.job?.location?.formattedAddress && " · "}
+                      {assign.createdAt
+                        ? new Date(assign.createdAt).toLocaleDateString()
+                        : "recently"}
                     </p>
                   </div>
-                  <div
-                    className={`flex items-center text-[10px] font-bold px-2 py-1 rounded-full border ${getStatusColor(assign.status)}`}
-                  >
-                    {getStatusIcon(assign.status)}
-                    {assign.status.toUpperCase()}
-                  </div>
+                  <Badge variant={getStatusVariant(assign.status)}>
+                    {assign.status}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
-                  <div className="text-xs text-gray-500">
-                    Assigned:{" "}
-                    {assign.createdAt
-                      ? new Date(assign.createdAt).toLocaleDateString()
-                      : "recently"}
-                  </div>
-                  <Button size="sm" variant="outline" className="text-xs h-8">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
             <EmptyState
-              icon={<ClipboardList className="w-12 h-12 text-gray-300" />}
+              icon={<ClipboardList className="w-12 h-12 text-muted-foreground" />}
               title="No jobs found"
               description="आपको अभी तक कोई काम नहीं सौंपा गया है।"
               actionLink="/worker/search"
@@ -226,12 +181,12 @@ function EmptyState({
   actionLabel,
 }: any) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-      <div className="mb-4 bg-white p-4 rounded-2xl shadow-sm">{icon}</div>
-      <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-      <p className="text-sm text-gray-500 mb-8 max-w-[200px]">{description}</p>
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <div className="mb-4 bg-accent p-4 rounded-2xl">{icon}</div>
+      <h3 className="text-lg font-bold text-foreground mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground mb-8 max-w-[220px]">{description}</p>
       <Link href={actionLink}>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 rounded-xl">
+        <Button size="lg" className="px-8">
           {actionLabel}
         </Button>
       </Link>

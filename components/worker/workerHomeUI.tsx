@@ -1,4 +1,4 @@
-import { AlertCircle, Briefcase, MapPin } from "lucide-react";
+import { ShieldCheck, MapPin, ChevronRight } from "lucide-react";
 import { WorkerHeader } from "./worker-header";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import Spinner from "../_shared/spinner";
@@ -25,39 +25,51 @@ export default function WorkerHomeUI({
   return (
     <div className="worker-container">
       <div className="worker-layout">
-        <WorkerHeader  home />
+        <WorkerHeader home />
 
         {/* Location Info */}
-        <div className="location-info">
-          <MapPin className="w-4 h-4" />
-          {locationLoading ? (
-            <Spinner fullscreen={false} />
-          ) : (
-            <span className="text-sm">
-              {location ? `${location.address}` : "Location disabled"}
-            </span>
-          )}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center gap-2 min-w-0">
+            <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+            {locationLoading ? (
+              <Spinner fullscreen={false} />
+            ) : (
+              <span className="text-sm text-foreground truncate">
+                {location ? `${location.address}` : "Location disabled"}
+              </span>
+            )}
+          </div>
+          <button className="text-sm font-medium text-primary shrink-0">
+            Change
+          </button>
         </div>
 
         {/* Main Content */}
-        <div className="px-4 py-6 space-y-4 pb-32">
-          <WorkerStatus
-            workStatus={workStatus}
-            onStatusChange={onStatusChange}
-          />
-          <ShareLocation />
-          <QuickStats workStatus={workStatus} data={data} />
-          <WorkerProfile />
+        <div className="px-4 py-5 pb-32 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+          {/* Main column: status + quick stats */}
+          <div className="space-y-6 lg:col-span-2">
+            <WorkerStatus
+              workStatus={workStatus}
+              onStatusChange={onStatusChange}
+            />
+            <QuickStats workStatus={workStatus} data={data} />
+          </div>
 
-          {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 shrink--0 mt-0.5" />
-            <div className="text-xs text-blue-900">
-              <p className="font-medium mb-1">Complete Your Profile</p>
-              <p>
-                Add your photo and reviews to increase your chances of getting
-                hired.
+          {/* Sidebar column: location sharing, profile, verification */}
+          <div className="space-y-6 mt-6 lg:mt-0 lg:col-span-1">
+            <ShareLocation />
+            <WorkerProfile />
+
+            {/* Verification Banner */}
+            <div className="bg-accent rounded-2xl p-4 flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5 text-accent-foreground shrink-0" />
+              <p className="flex-1 text-xs font-medium text-accent-foreground">
+                Add Aadhaar — verified workers get more jobs
               </p>
+              <button className="flex items-center gap-0.5 text-sm font-semibold text-primary shrink-0">
+                Add
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

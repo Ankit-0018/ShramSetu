@@ -3,8 +3,9 @@
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EmployerNav } from "@/components/navigation/EmployerNav";
+import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
 import { Button } from "@/components/ui/button";
+import { PillTabs } from "@/components/ui/pill-tabs";
 import { Assignment } from "@/lib/types/job";
 import { completeAssignment, cancelAssignment } from "@/lib/actions/assignment";
 import {
@@ -12,7 +13,6 @@ import {
   CheckCircle2,
   XCircle,
   ClipboardList,
-  User,
   Loader2,
 } from "lucide-react";
 import { getEmployerAssignments } from "@/lib/queries/assignments";
@@ -78,20 +78,6 @@ export default function AssignmentsClient() {
     }
   };
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "IN_PROGRESS":
-      case "PENDING":
-        return "bg-green-50 text-green-600 border-green-100";
-      case "COMPLETED":
-        return "bg-blue-50 text-blue-600 border-blue-100";
-      case "CANCELLED":
-        return "bg-orange-50 text-orange-600 border-orange-100";
-      default:
-        return "bg-gray-50 text-gray-600 border-gray-100";
-    }
-  };
-
   useEffect(() => {
     if (!user) return;
     getEmployerAssignments(1, 50).then((res) => {
@@ -104,126 +90,118 @@ export default function AssignmentsClient() {
     return <Spinner />;
   }
 
+  const initials = (name?: string) =>
+    (name || "?")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase())
+      .join("");
+
   return (
-    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
+    <div className="min-h-screen bg-white pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-blue-600 text-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+      <div className="sticky top-0 z-40 bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
           <Link href="/employer/home">
-            <ChevronLeft className="w-6 h-6 cursor-pointer" />
+            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold">काम प्रबंधन</h1>
-            <p className="text-sm text-blue-100">Manage Assignments</p>
-          </div>
+          <h1 className="flex-1 text-xl font-bold text-foreground">Active work</h1>
+          <EmployerNavLinks />
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="max-w-4xl mx-auto px-4 pt-4">
-        <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
-          <button
-            onClick={() => setActiveTab("active")}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "active"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            सक्रिय / Active ({active.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("completed")}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "completed"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            पूरा / Done ({completed.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("cancelled")}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === "cancelled"
-                ? "bg-white text-orange-600 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            रद्द / Cancelled ({cancelled.length})
-          </button>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 pt-4">
+        <PillTabs
+          className="mb-6"
+          items={[
+            { key: "active", label: "Active", count: active.length },
+            { key: "completed", label: "Done", count: completed.length },
+            { key: "cancelled", label: "Cancelled", count: cancelled.length },
+          ]}
+          active={activeTab}
+          onChange={(key) => setActiveTab(key as Tab)}
+        />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 space-y-4">
+      <div className="max-w-6xl mx-auto px-4">
         {filteredAssignments.length > 0 ? (
-          filteredAssignments.map((assign) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredAssignments.map((assign) => (
             <div
               key={assign.id}
-              className="bg-white rounded-2xl p-5 shadow-sm border border-gray-200"
+              className="rounded-2xl border border-border p-5"
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-4 gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                    <span className="text-sm font-semibold text-foreground">
+                      {initials(assign.worker?.user.fullName)}
+                    </span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">
-                      Worker: {assign.worker?.user.fullName || assign.workerId}
+                    <p className="font-bold text-foreground text-sm">
+                      {assign.worker?.user.fullName || assign.workerId}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Job: {assign.job?.title || assign.jobId}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Assigned:{" "}
+                      {assign.job?.title || assign.jobId} · since{" "}
                       {assign.createdAt
                         ? new Date(assign.createdAt).toLocaleDateString()
                         : "Recently"}
                     </p>
                   </div>
                 </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-1 rounded-full border ${getStatusStyle(assign.status)}`}
-                >
-                  {assign.status.toUpperCase()}
-                </span>
               </div>
 
               {/* Actions for active assignments */}
               {(assign.status === "IN_PROGRESS" || assign.status === "PENDING") && (
                 <div className="flex gap-3">
                   <Button
-                    className="flex-1 bg-green-600 hover:bg-green-700 h-10 text-sm"
+                    variant="outline"
+                    className="flex-1 border-primary text-primary hover:bg-accent"
                     onClick={() => handleComplete(assign.id)}
                     disabled={processingId === assign.id}
                   >
                     {processingId === assign.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      <CheckCircle2 className="w-4 h-4" />
                     )}
-                    पूर्ण / Complete
+                    Mark done
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 border-orange-200 text-orange-600 hover:bg-orange-50 h-10 text-sm"
+                    className="flex-1 border-destructive/40 text-destructive hover:bg-destructive/10"
                     onClick={() => handleCancel(assign.id)}
                     disabled={processingId === assign.id}
                   >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    रद्द / Cancel
+                    <XCircle className="w-4 h-4" />
+                    Cancel
                   </Button>
                 </div>
               )}
+
+              {/* Completed state */}
+              {assign.status === "COMPLETED" && (
+                <div className="flex items-center gap-2 text-sm text-primary font-semibold">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Wages paid ·{" "}
+                  {assign.updatedAt
+                    ? new Date(assign.updatedAt).toLocaleDateString()
+                    : new Date(assign.createdAt).toLocaleDateString()}
+                </div>
+              )}
             </div>
-          ))
+          ))}
+          </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center bg-secondary rounded-2xl">
             <div className="mb-4 bg-white p-4 rounded-2xl shadow-sm">
               <ClipboardList className="w-12 h-12 text-gray-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              कोई काम नहीं / No Assignments
+            <h3 className="text-lg font-bold text-foreground mb-2">
+              No assignments
             </h3>
             <p className="text-sm text-gray-500">
               {activeTab === "active"

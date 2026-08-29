@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
 import { WorkerHeader } from "@/components/worker/worker-header";
 import {
@@ -9,7 +10,6 @@ import {
   MapPin,
   Clock,
   ChevronLeft,
-  CheckCircle2,
   Calendar,
   Loader2,
 } from "lucide-react";
@@ -95,127 +95,182 @@ export default function JobDetailsPage() {
         <div className="px-4 py-3">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors"
+            className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
           </button>
         </div>
 
-        <div className="px-4 space-y-6 pb-32">
-          {/* Job Image & Basic Info */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
-            <div className="relative h-48 w-full bg-gray-100">
-              {job.imageUrls?.[0] ? (
-                <Image
-                  src={job.imageUrls[0]}
-                  alt="Job image"
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                  <Briefcase className="w-12 h-12 opacity-20" />
-                </div>
-              )}
-              <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                ₹{job.minimumWage} / {job.jobType}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h1 className="text-xl font-bold text-gray-900">{job.title}</h1>
-                <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md font-medium">
-                  {job.isActive ? "Open" : "Closed"}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-4">
-                <div className="flex items-center">
-                  <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                  {job.location.formattedAddress || "N/A"}
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                  {job.jobType}
-                </div>
-                <div className="flex items-center">
-                  <Calendar className="w-3.5 h-3.5 mr-1 text-gray-400" />
-                  {formattedDate}
-                </div>
-                {typeof job.distanceKm === "number" && (
-                  <div className="flex items-center">
-                    {job.distanceKm.toFixed(1)} km away
+        <div className="px-4 pb-32 lg:pb-12 lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+          {/* Main column */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* Job Image */}
+            <div className="rounded-2xl overflow-hidden border border-border">
+              <div className="relative h-48 lg:h-72 w-full bg-secondary">
+                {job.imageUrls?.[0] ? (
+                  <Image
+                    src={job.imageUrls[0]}
+                    alt="Job image"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                    <Briefcase className="w-12 h-12 opacity-20" />
                   </div>
                 )}
               </div>
+            </div>
 
-              <div className="flex items-center pt-4 border-t border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex-shrink-0 mr-3 flex items-center justify-center font-bold text-blue-600">
-                  {job.employer.user.fullName?.charAt(0) || "E"}
+            {/* Title & Status */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant={job.isActive ? "success" : "default"}>
+                  {job.isActive ? "Active" : "Closed"}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Posted {formattedDate}
+                </span>
+              </div>
+              <h1 className="text-xl font-bold text-foreground mb-1">
+                {job.title}
+              </h1>
+              <p className="text-2xl font-bold text-primary">
+                ₹{job.minimumWage}{" "}
+                <span className="text-sm font-medium text-muted-foreground">
+                  / day
+                </span>
+              </p>
+            </div>
+
+            {/* Job Info Rows */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5 text-accent-foreground" />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {job.employer.businessName || job.employer.user.fullName || "Employer"}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">
+                    {job.location.formattedAddress || "N/A"}
                   </p>
+                  {typeof job.distanceKm === "number" && (
+                    <p className="text-xs text-muted-foreground">
+                      {job.distanceKm.toFixed(1)} km away
+                    </p>
+                  )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-blue-600"
-                  onClick={() =>
-                    router.push(`/worker/employer/${job.employer.id}`)
-                  }
-                >
-                  View Profile
-                </Button>
+              </div>
+
+              <div className="flex items-center gap-3 px-4 py-3 border-t border-border">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{job.jobType}</p>
+                  <p className="text-xs text-muted-foreground">Job type</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-4 py-3 border-t border-border">
+                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+                  <Calendar className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{formattedDate}</p>
+                  <p className="text-xs text-muted-foreground">Posted on</p>
+                </div>
               </div>
             </div>
+
+            {/* Job Description */}
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-primary" />
+                What the job involves
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {job.description}
+              </p>
+            </div>
+
+            {/* Skill Required */}
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <h2 className="text-sm font-semibold text-foreground mb-3">
+                Skill required
+              </h2>
+              <Badge variant="default">{job.primarySkill}</Badge>
+            </div>
           </div>
 
-          {/* Job Description */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
-              Description
-            </h2>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {job.description}
-            </p>
-          </div>
-
-          {/* Skill Required */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-              <Briefcase className="w-4 h-4 mr-2 text-blue-500" />
-              Skill Required
-            </h2>
-            <span className="bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium inline-block">
-              {job.primarySkill}
-            </span>
-          </div>
-
-          {/* Action Button */}
-          {job.isActive && (
-            <div className="fixed bottom-24 left-0 right-0 px-4 max-w-[28rem] mx-auto z-40">
+          {/* Sidebar: employer + apply CTA */}
+          <div className="mt-6 lg:mt-0 lg:col-span-1 lg:sticky lg:top-20 space-y-4">
+            {/* Employer */}
+            <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary flex-shrink-0 flex items-center justify-center font-bold text-primary-foreground text-lg">
+                {job.employer.user.fullName?.charAt(0) || "E"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">
+                  {job.employer.businessName || job.employer.user.fullName || "Employer"}
+                </p>
+                {/* NOTE: employer verification status isn't provided by the
+                    backend, so a "Verified employer" badge isn't shown here. */}
+              </div>
               <Button
-                onClick={handleApply}
-                disabled={isApplying}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  router.push(`/worker/employer/${job.employer.id}`)
+                }
               >
-                {isApplying ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                )}
-                <span className="text-lg font-bold">
-                  {isApplying ? "Applying..." : "Apply Now"}
-                </span>
+                View Profile
               </Button>
             </div>
-          )}
+
+            {/* Action Button - in-flow sidebar version, lg+ only */}
+            {job.isActive && (
+              <div className="hidden lg:block rounded-2xl border border-border bg-card p-4">
+                <Button
+                  onClick={handleApply}
+                  disabled={isApplying}
+                  size="xl"
+                  className="w-full shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70"
+                >
+                  {isApplying ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  )}
+                  <span className="text-lg font-bold">
+                    {isApplying ? "Applying..." : "Apply Now"}
+                  </span>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Action Button - fixed bottom bar, mobile/below-lg only */}
+        {job.isActive && (
+          <div className="fixed bottom-24 left-0 right-0 px-4 max-w-[28rem] mx-auto z-40 lg:hidden">
+            <Button
+              onClick={handleApply}
+              disabled={isApplying}
+              size="xl"
+              className="w-full shadow-xl flex items-center justify-center gap-2 group disabled:opacity-70"
+            >
+              {isApplying ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              )}
+              <span className="text-lg font-bold">
+                {isApplying ? "Applying..." : "Apply Now"}
+              </span>
+            </Button>
+          </div>
+        )}
       </div>
       <WorkerNav />
     </div>

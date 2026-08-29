@@ -10,14 +10,14 @@ export default function Spinner({ text, fullscreen = true }: SpinnerProps) {
     <div className="flex flex-col items-center gap-3">
       <div className="relative w-5 h-5 animate-spin">
         {[
-          { r: 0, c: "#E87722", o: "opacity-100" },
-          { r: 45, c: "#E87722", o: "opacity-85" },
-          { r: 90, c: "#1A6FAF", o: "opacity-70" },
-          { r: 135, c: "#1A6FAF", o: "opacity-55" },
-          { r: 180, c: "#1A6FAF", o: "opacity-40" },
-          { r: 225, c: "#1A6FAF", o: "opacity-30" },
-          { r: 270, c: "#E87722", o: "opacity-20" },
-          { r: 315, c: "#E87722", o: "opacity-10" },
+          { r: 0, c: "#1a7a3c", o: "opacity-100" },
+          { r: 45, c: "#1a7a3c", o: "opacity-85" },
+          { r: 90, c: "#1a7a3c", o: "opacity-70" },
+          { r: 135, c: "#1a7a3c", o: "opacity-55" },
+          { r: 180, c: "#1a7a3c", o: "opacity-40" },
+          { r: 225, c: "#1a7a3c", o: "opacity-30" },
+          { r: 270, c: "#1a7a3c", o: "opacity-20" },
+          { r: 315, c: "#1a7a3c", o: "opacity-10" },
         ].map((dot, i) => (
           <span
             key={i}

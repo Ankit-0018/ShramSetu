@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { EmployerNav } from "@/components/navigation/EmployerNav";
+import { EmployerNav, EmployerNavLinks } from "@/components/navigation/EmployerNav";
 import LocationField from "@/components/sections/location-field";
 import { createJob } from "@/lib/actions/job";
 import { useUserStore } from "@/lib/stores/useUserStore";
@@ -88,137 +88,146 @@ export default function PostJobPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-blue-600 text-white shadow-sm">
+      <div className="sticky top-0 z-40 bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <Link href="/employer/home">
-            <ChevronLeft className="w-6 h-6 cursor-pointer" />
+            <ChevronLeft className="w-6 h-6 cursor-pointer text-foreground" />
           </Link>
-          <div>
-            <h1 className="text-2xl font-bold">नई नौकरी पोस्ट करें</h1>
-            <p className="text-sm text-blue-100">Post a new job</p>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-foreground">
+              Post a new job
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              नई नौकरी पोस्ट करें
+            </p>
           </div>
+          <EmployerNavLinks />
         </div>
       </div>
 
       {/* Form */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Job Title */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                काम का नाम / Job Title *
-              </label>
-              <Input
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="जैसे: विद्युत मरम्मत"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-8 lg:max-w-2xl lg:mx-auto">
+          {/* Job Title */}
+          <div>
+            <label className="block font-semibold text-foreground mb-2">
+              Job title / काम का नाम *
+            </label>
+            <Input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="जैसे: विद्युत मरम्मत"
+              required
+            />
+          </div>
 
-            {/* Skill */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                आवश्यक कौशल / Skill Required *
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {SKILLS.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() =>
-                      setFormData((p) => ({ ...p, primarySkill: s.id }))
-                    }
-                    className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      formData.primarySkill === s.id
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+          {/* Skill */}
+          <div>
+            <p className="font-semibold text-foreground mb-3">
+              Skill needed / आवश्यक कौशल *
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-2">
+              {SKILLS.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() =>
+                    setFormData((p) => ({ ...p, primarySkill: s.id }))
+                  }
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold text-center transition ${
+                    formData.primarySkill === s.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-white border border-border text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Job Type */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                काम का प्रकार / Job Type *
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {JOB_TYPES.map((jt) => (
-                  <button
-                    key={jt.id}
-                    type="button"
-                    onClick={() =>
-                      setFormData((p) => ({ ...p, jobType: jt.id }))
-                    }
-                    className={`p-3 rounded-lg border-2 text-sm font-medium ${
-                      formData.jobType === jt.id
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    {jt.label}
-                  </button>
-                ))}
-              </div>
+          {/* Job Type */}
+          <div>
+            <p className="font-semibold text-foreground mb-3">
+              Duration / काम का प्रकार *
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {JOB_TYPES.map((jt) => (
+                <button
+                  key={jt.id}
+                  type="button"
+                  onClick={() =>
+                    setFormData((p) => ({ ...p, jobType: jt.id }))
+                  }
+                  className={`rounded-full px-3 py-2.5 text-sm font-semibold text-center transition ${
+                    formData.jobType === jt.id
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-white border border-border text-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {jt.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Wage */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                न्यूनतम मजदूरी / Minimum Wage (₹) *
-              </label>
-              <Input
+          {/* Wage */}
+          <div>
+            <label className="block font-semibold text-foreground mb-2">
+              Daily wage / न्यूनतम मजदूरी *
+            </label>
+            <div className="flex h-14 items-center gap-1 rounded-2xl bg-secondary px-4">
+              <span className="text-2xl font-extrabold text-primary">₹</span>
+              <input
                 type="number"
                 name="minimumWage"
                 value={formData.minimumWage}
                 onChange={handleChange}
                 required
+                className="h-full flex-1 bg-transparent text-2xl font-extrabold text-primary outline-none"
+                placeholder="750"
               />
+              <span className="text-sm text-muted-foreground">/ day</span>
             </div>
+          </div>
 
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                स्थान / Location
-              </label>
+          {/* Location */}
+          <div>
+            <label className="block font-semibold text-foreground mb-2">
+              Location / स्थान
+            </label>
 
-              <LocationField />
-            </div>
+            <LocationField />
+          </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-semibold mb-2">
-                विवरण / Description
-              </label>
-              <textarea
-                name="description"
-                rows={4}
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full border rounded-lg px-3 py-2"
-              />
-            </div>
+          {/* Description */}
+          <div>
+            <label className="block font-semibold text-foreground mb-2">
+              Description / विवरण
+            </label>
+            <textarea
+              name="description"
+              rows={4}
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full rounded-2xl bg-secondary px-4 py-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            />
+          </div>
 
-            {/* Submit */}
-            <Button className="w-full bg-blue-600 h-12">
-              नौकरी पोस्ट करें / Post Job
+          {/* Submit */}
+          <Button size="xl" className="w-full">
+            Post job / नौकरी पोस्ट करें
+          </Button>
+
+          <Link href="/employer/home">
+            <Button variant="outline" size="xl" className="w-full">
+              Cancel / रद्द करें
             </Button>
-
-            <Link href="/employer/home">
-              <Button variant="outline" className="w-full bg-transparent">
-                रद्द करें / Cancel
-              </Button>
-            </Link>
-          </form>
-        </div>
+          </Link>
+        </form>
       </div>
 
       <EmployerNav />

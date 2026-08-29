@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { WorkerNav } from "@/components/navigation/WorkerNav";
 import "@/styles/worker.css";
-import { CheckCircle2, Clock, ClipboardList } from "lucide-react";
 import { useUserStore } from "@/lib/stores/useUserStore";
 import { getMyAssignedJobs } from "@/lib/queries/assignments";
 import { Assignment } from "@/lib/types/job";
 import Spinner from "@/components/_shared/spinner";
+import { Badge } from "@/components/ui/badge";
 
 // TODO: the backend's assignment list endpoints don't return a wage/earnings
 // amount per assignment, so we can no longer compute earnings totals
@@ -44,66 +44,83 @@ export default function WorkerEarningsPage() {
   const activeAssignments = assignments.filter((a) => a.status === "IN_PROGRESS");
   const pendingAssignments = assignments.filter((a) => a.status === "PENDING");
 
+  const getStatusVariant = (
+    status: string,
+  ): "warning" | "success" | "danger" | "outline" | "default" => {
+    switch (status) {
+      case "PENDING":
+        return "warning";
+      case "IN_PROGRESS":
+        return "success";
+      case "COMPLETED":
+        return "outline";
+      case "CANCELLED":
+        return "danger";
+      default:
+        return "default";
+    }
+  };
+
   return (
     <div className="worker-container">
       <div className="worker-layout">
-        {/* Header */}
-        <div className="worker-header">
-          <div className="worker-header-content">
-            <h1 className="worker-header-title">My Work</h1>
-          </div>
-        </div>
-
         {/* Scroll Content */}
         <div className="px-4 py-6 space-y-6">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-card rounded-lg p-4 shadow-sm text-center">
-              <Clock className="w-5 h-5 mx-auto mb-2 text-amber-600" />
-              <p className="text-xl font-bold text-amber-600">
+          {/* Header */}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">My earnings</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              All time
+            </p>
+          </div>
+
+          {/* Stats Row */}
+          <div className="max-w-2xl mx-auto grid grid-cols-3 divide-x divide-border border-y border-border py-4">
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">
                 {pendingAssignments.length}
               </p>
-              <p className="text-xs text-muted-foreground">Pending</p>
+              <p className="text-xs text-muted-foreground mt-1">Waiting</p>
             </div>
-            <div className="bg-card rounded-lg p-4 shadow-sm text-center">
-              <ClipboardList className="w-5 h-5 mx-auto mb-2 text-blue-600" />
-              <p className="text-xl font-bold text-blue-600">
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">
                 {activeAssignments.length}
               </p>
-              <p className="text-xs text-muted-foreground">In Progress</p>
+              <p className="text-xs text-muted-foreground mt-1">Active</p>
             </div>
-            <div className="bg-card rounded-lg p-4 shadow-sm text-center">
-              <CheckCircle2 className="w-5 h-5 mx-auto mb-2 text-green-600" />
-              <p className="text-xl font-bold text-green-600">
+            <div className="text-center">
+              <p className="text-xl font-bold text-foreground">
                 {completedAssignments.length}
               </p>
-              <p className="text-xs text-muted-foreground">Completed</p>
+              <p className="text-xs text-muted-foreground mt-1">Done</p>
             </div>
           </div>
 
-          {/* Recent Assignments */}
-          <div className="bg-card rounded-lg p-4 shadow-sm">
-            <h3 className="font-semibold mb-4">Recent Assignments</h3>
+          {/* Work log */}
+          <div>
+            <h3 className="font-bold text-foreground mb-2">Work log</h3>
             {assignments.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {assignments.slice(0, 10).map((assign) => (
                   <div
                     key={assign.id}
-                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4"
                   >
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-foreground truncate">
                         {assign.job?.title || "Assignment"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {assign.job?.location?.formattedAddress}
+                        {assign.job?.location?.formattedAddress && " · "}
                         {assign.createdAt
                           ? new Date(assign.createdAt).toLocaleDateString()
                           : "N/A"}
                       </p>
                     </div>
-                    <p className="text-xs font-semibold text-primary">
+                    <Badge variant={getStatusVariant(assign.status)}>
                       {assign.status}
-                    </p>
+                    </Badge>
                   </div>
                 ))}
               </div>
